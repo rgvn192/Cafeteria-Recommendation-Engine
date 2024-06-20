@@ -51,11 +51,13 @@ async Task CheckRepo(IServiceProvider services)
 
         var menuitem = new MenuItemModel()
         {
+            MenuItemId = 18,
             Name = "Malai Kofta",
-            Price = 120.00m,
+            Price = 130.00m,
             MenuItemCategoryId = 2,
+            IsAvailable = true,
         };
-        await menuItemService.Add<MenuItemModel>(menuitem);
+        await menuItemService.Update<MenuItemModel>(menuitem.MenuItemId, menuitem);
 
         Console.WriteLine($"Received and stored notification for user");
     }

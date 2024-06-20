@@ -24,6 +24,9 @@ namespace Server.CommandHandlers
             {
                 { "Login", (body => HandleLogin(serviceProvider, body), role => true) },
                 { "AddMenuItem", (body => HandleAddMenuItem(serviceProvider, body), role => role == "Admin") },
+                { "UpdateMenuItem", (body => HandleUpdateMenuItem(serviceProvider, body), role => role == "Admin") },
+                { "DeleteMenuItem", (body => HandleDeleteMenuItem(serviceProvider, body), role => role == "Admin") },
+                { "ToggleMenuItemAvailability", (body => HandleToggleMenuItemAvailability(serviceProvider, body), role => role == "Admin") },
                 // Add other commands and their authorization checks here
             };
         }
