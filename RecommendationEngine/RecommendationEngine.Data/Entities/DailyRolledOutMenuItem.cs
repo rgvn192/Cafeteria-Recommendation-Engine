@@ -8,17 +8,18 @@ using System.Threading.Tasks;
 
 namespace RecommendationEngine.Data.Entities
 {
-    public class DailyMenuRecommendation : BaseEntity
+    public class DailyRolledOutMenuItem : BaseEntity
     {
         [Key]
-        public int DailyMenuRecommendationId { get; set; }
-        public int Votes { get; set; }
+        public int DailyRolledOutMenuItemId { get; set; }
         public bool IsShortListed { get; set; }
         public int MenuItemId { get; set; }
         public int MealTypeId { get; set; }
 
         public MenuItem MenuItem { get; set; }
         public MealType MealType { get; set; }
+
+        List<DailyRolledOutMenuItemVote> DailyRolledOutMenuItemVotes { get;}
 
     }
 }

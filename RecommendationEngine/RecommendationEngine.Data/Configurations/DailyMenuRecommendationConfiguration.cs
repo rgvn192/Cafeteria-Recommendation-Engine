@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 namespace RecommendationEngine.Data.Configurations
 {
 
-    public class DailyMenuRecommendationConfiguration : BaseConfiguration<DailyMenuRecommendation>
+    public class DailyRolledOutMenuItemConfiguration : BaseConfiguration<DailyRolledOutMenuItem>
     {
-        public override void Configure(EntityTypeBuilder<DailyMenuRecommendation> builder)
+        public override void Configure(EntityTypeBuilder<DailyRolledOutMenuItem> builder)
         {
             base.Configure(builder);
             builder.Property(x => x.IsShortListed).HasDefaultValue(false);

@@ -28,5 +28,7 @@ namespace RecommendationEngine.Data.Entities
 
         public List<Notification> Notifications { get; set; }
         public List<Feedback> Feedbacks { get; set; }
+        public List<DailyRolledOutMenuItemVote> DailyRolledOutMenuItemVotes { get; set; }
+
     }
 }

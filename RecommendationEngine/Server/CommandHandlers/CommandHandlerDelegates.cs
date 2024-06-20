@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Server.Models.DTO;
 using AutoMapper;
+using RecommendationEngine.Data.Entities;
 
 namespace Server.CommandHandlers
 {
@@ -107,6 +108,31 @@ namespace Server.CommandHandlers
             {
                 Status = "Success",
                 Message = "Menu item deleted successfully."
+            };
+
+            return new CustomProtocolResponse
+            {
+                Status = "Success",
+                Body = JsonConvert.SerializeObject(response)
+            };
+        }
+
+        public async static Task<CustomProtocolResponse> HandleGetMenuItems(IServiceProvider serviceProvider, string body)
+        {
+            var request = JsonConvert.DeserializeObject<GetMenuItemsRequestModel>(body);
+
+            List<MenuItemModel> menuItems;
+
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+
+                menuItems = await menuItemService.GetList<MenuItemModel>(null, null, null, request.Limit, request.Offset);
+            }
+
+            var response = new GetMenuItemsResponseModel
+            {
+                MenuItems = menuItems
             };
 
             return new CustomProtocolResponse

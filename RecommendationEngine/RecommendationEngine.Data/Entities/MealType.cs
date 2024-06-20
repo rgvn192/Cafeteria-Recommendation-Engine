@@ -17,7 +17,7 @@ namespace RecommendationEngine.Data.Entities
         [Column(TypeName = ("nvarchar(30)"))]
         public MealTypes Name { get; set; }
 
-        public List<DailyMenuRecommendation> DailyMenuRecommendations { get; set; }
+        public List<DailyRolledOutMenuItem> DailyRolledOutMenuItems { get; set; }
     }
 
     public enum MealTypes
