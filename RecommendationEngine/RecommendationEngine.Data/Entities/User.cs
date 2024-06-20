@@ -25,5 +25,8 @@ namespace RecommendationEngine.Data.Entities
         public Role Role { get; set; }
 
         public bool IsEnabled { get; set; }
+
+        public List<Notification> Notifications { get; set; }
+        public List<Feedback> Feedbacks { get; set; }
     }
 }

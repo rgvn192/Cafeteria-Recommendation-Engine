@@ -16,6 +16,11 @@ namespace RecommendationEngine.Data
         public DbSet<Role> Roles { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<MenuItemCategory> MenuItemCategorys { get; set; }
+        public DbSet<DailyMenuRecommendation> DailyMenuRecommendations { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<MealType> MealTypes { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<NotificationType> NotificationTypes { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -27,6 +32,11 @@ namespace RecommendationEngine.Data
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
             modelBuilder.ApplyConfiguration(new MenuItemConfiguration());
             modelBuilder.ApplyConfiguration(new MenuItemCategoryConfiguration());
+            modelBuilder.ApplyConfiguration(new DailyMenuRecommendationConfiguration());
+            modelBuilder.ApplyConfiguration(new FeedbackConfiguration());
+            modelBuilder.ApplyConfiguration(new MealTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new NotificationTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new NotificationConfiguration());
 
             modelBuilder.Seed();
         }

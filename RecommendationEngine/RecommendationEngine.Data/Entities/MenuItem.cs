@@ -26,5 +26,7 @@ namespace RecommendationEngine.Data.Entities
         public decimal UserLikeability { get; set; }
 
         public MenuItemCategory MenuItemCategory { get; set; }
+        public List<Feedback> Feedbacks { get; set; }
+        public List<DailyMenuRecommendation> DailyMenuRecommendations { get; set; }
     }
 }

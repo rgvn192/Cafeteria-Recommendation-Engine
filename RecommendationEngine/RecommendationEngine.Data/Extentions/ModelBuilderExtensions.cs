@@ -58,6 +58,21 @@ namespace RecommendationEngine.Data.Extentions
                 new MenuItem { MenuItemId = 17, Name = "Steamed Basmati Rice", Price = 25.00m, MenuItemCategoryId = 5 }
 
             );
+
+            modelBuilder.Entity<NotificationType>().HasData(
+                new NotificationType { NotificationTypeId = 1, Name = NotificationTypes.MenuItemVoting },
+                new NotificationType { NotificationTypeId = 2, Name = NotificationTypes.FinalizeMenu },
+                new NotificationType { NotificationTypeId = 3, Name = NotificationTypes.NewMenuItemAdded },
+                new NotificationType { NotificationTypeId = 4, Name = NotificationTypes.MenuItemAvailabilityUpdated }
+
+            );
+
+            modelBuilder.Entity<MealType>().HasData(
+                new MealType { MealTypeId = 1, Name = MealTypes.Breakfast },
+                new MealType { MealTypeId = 2, Name = MealTypes.Lunch },
+                new MealType { MealTypeId = 3, Name = MealTypes.Dinner }
+
+            );
         }
     }
 
