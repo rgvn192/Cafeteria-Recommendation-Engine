@@ -9,8 +9,9 @@ using RecommendationEngine.Data.Extentions;
 using RecommendationEngine.Data.Entities;
 using Server.Services;
 using Server.Interface;
-
-Console.WriteLine("Hello, World!");
+using Server;
+using Server.CommandHandlers;
+using Server.Models.DTO;
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((context, config) =>
@@ -33,23 +34,28 @@ var host = Host.CreateDefaultBuilder(args)
         services.RegisterServices();
 
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+        services.AddSingleton<ICommandHandlerRegistry, CommandHandlerRegistry>();
+        services.AddHostedService<ServerHostedService>();
     })
     .Build();
 
-await CheckRepo(host.Services);
+await host.RunAsync();
+
+//await CheckRepo(host.Services);
 async Task CheckRepo(IServiceProvider services)
 {
     using (var scope = services.CreateScope())
     {
-        var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
 
-        var user = new User
+        var menuitem = new MenuItemModel()
         {
-            Email = "rgvn192@gmail.com",
-            RoleId = 2,
-            Name = "Rgvn"
+            Name = "Malai Kofta",
+            Price = 120.00m,
+            MenuItemCategoryId = 2,
         };
-        await userService.Add<User>(user);
+        await menuItemService.Add<MenuItemModel>(menuitem);
 
         Console.WriteLine($"Received and stored notification for user");
     }

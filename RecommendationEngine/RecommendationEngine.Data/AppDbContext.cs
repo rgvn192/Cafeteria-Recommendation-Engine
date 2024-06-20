@@ -14,6 +14,8 @@ namespace RecommendationEngine.Data
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<MenuItem> MenuItems { get; set; }
+        public DbSet<MenuItemCategory> MenuItemCategorys { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -23,6 +25,8 @@ namespace RecommendationEngine.Data
         {
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new RoleConfiguration());
+            modelBuilder.ApplyConfiguration(new MenuItemConfiguration());
+            modelBuilder.ApplyConfiguration(new MenuItemCategoryConfiguration());
 
             modelBuilder.Seed();
         }

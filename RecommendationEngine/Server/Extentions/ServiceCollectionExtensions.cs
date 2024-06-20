@@ -15,6 +15,8 @@ namespace Server.Extentions
         {
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoleService, RoleService>();
+            services.AddScoped<IAuthorisationService, AuthorisationService>();
+            services.AddScoped<IMenuItemService, MenuItemService>();
             return services;
         }
     }
