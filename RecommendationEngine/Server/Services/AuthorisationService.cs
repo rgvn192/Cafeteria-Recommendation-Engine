@@ -18,7 +18,7 @@ namespace Server.Services
             _userService = userService;
         }
 
-        public async Task<string> AuthenticateUser(LoginRequestModel loginRequest)
+        public async Task<User> AuthenticateUser(LoginRequestModel loginRequest)
         {
             if (!int.TryParse(loginRequest.UserId, out int userId))
             {
@@ -29,7 +29,7 @@ namespace Server.Services
 
             if (user != null && user.Name.ToLower() == loginRequest.Name.ToLower())
             {
-                return user.Role.Name.ToString();
+                return user;
             }
 
             return null;

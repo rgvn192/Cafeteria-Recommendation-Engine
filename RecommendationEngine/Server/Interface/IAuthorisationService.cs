@@ -1,4 +1,5 @@
-﻿using Server.Models.Request;
+﻿using RecommendationEngine.Data.Entities;
+using Server.Models.Request;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace Server.Interface
 {
     internal interface IAuthorisationService
     {
-        Task<string> AuthenticateUser(LoginRequestModel loginRequest);
+        Task<User> AuthenticateUser(LoginRequestModel loginRequest);
     }
 }

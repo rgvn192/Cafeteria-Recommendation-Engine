@@ -9,5 +9,6 @@ namespace Server.Models.Response
     internal class LoginResponseModel
     {
         public string Role { get; set; }
+        public int? UserId { get; set; }
     }
 }

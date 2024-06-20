@@ -24,16 +24,17 @@ namespace Server.CommandHandlers
         {
             var loginRequest = JsonConvert.DeserializeObject<LoginRequestModel>(body);
             var authService = serviceProvider.GetRequiredService<IAuthorisationService>();
-            var role = await authService.AuthenticateUser(loginRequest);
+            var user = await authService.AuthenticateUser(loginRequest);
 
             var loginResponse = new LoginResponseModel
             {
-                Role = role
+                Role = user.Role.Name.ToString(),
+                UserId = user?.UserId
             };
 
             return new CustomProtocolResponse
             {
-                Status = role != null ? "Success" : "Failed",
+                Status = user != null ? "Success" : "Failed",
                 Body = JsonConvert.SerializeObject(loginResponse)
             };
         }
