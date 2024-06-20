@@ -59,8 +59,6 @@ namespace RecommendationEngine.Data.Extentions
 
             );
         }
-
-
     }
 
 }
