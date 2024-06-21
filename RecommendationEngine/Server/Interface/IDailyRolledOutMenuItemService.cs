@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 
 namespace Server.Interface
 {
-    public interface IMenuItemService : ICrudBaseService<MenuItem>
+    public interface IDailyRolledOutMenuItemService : ICrudBaseService<DailyRolledOutMenuItem>
     {
-        Task<List<MenuItem>> GetRecommendationByMenuItemCategory(int menuItemCategory, int limit);
     }
 }

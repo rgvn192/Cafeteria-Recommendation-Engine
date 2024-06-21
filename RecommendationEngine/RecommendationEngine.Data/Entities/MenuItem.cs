@@ -25,6 +25,9 @@ namespace RecommendationEngine.Data.Entities
         [Column(TypeName = "decimal(5, 2)")]
         public decimal UserLikeability { get; set; }
 
+        [Column(TypeName = "decimal(5, 2)")]
+        public decimal AverageRating { get; set; }
+
         public MenuItemCategory MenuItemCategory { get; set; }
         public List<Feedback> Feedbacks { get; set; }
         public List<DailyRolledOutMenuItem> DailyRolledOutMenuItems { get; set; }

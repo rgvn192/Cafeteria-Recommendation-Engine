@@ -29,7 +29,7 @@ namespace Server.CommandHandlers
 
             var loginResponse = new LoginResponseModel
             {
-                Role = user.Role.Name.ToString(),
+                Role = user?.Role.Name.ToString(),
                 UserId = user?.UserId
             };
 
@@ -167,6 +167,66 @@ namespace Server.CommandHandlers
             };
         }
 
+        public async static Task<CustomProtocolResponse> HandleRollOutMenuForNextDayForVoting(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+                var request = JsonConvert.DeserializeObject<List<DailyRolledOutMenuItemRequestModel>>(body);
+
+                using (var scope = serviceProvider.CreateScope())
+                {
+
+                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                    var dailyRolledOutMenuItemService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemService>();
+
+                    var dailyRolledOuts = mapper.Map<List<DailyRolledOutMenuItemRequestModel>, List<DailyRolledOutMenuItem>>(request);
+                    await dailyRolledOutMenuItemService.AddRange(dailyRolledOuts);
+                }
+
+                var response = new CommonServerResponse
+                {
+                    Status = "Success",
+                    Message = "Daily Menu Rolled out successfully."
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failed",
+                    Body = JsonConvert.SerializeObject(ex)
+                };
+            }
+        }
+
+        public async static Task<CustomProtocolResponse> HandleGetRecommendation(IServiceProvider serviceProvider, string body)
+        {
+            var request = JsonConvert.DeserializeObject<GetRecommendationRequestModel>(body);
+
+            List<GetRecommendationMenuItemResponse> menuItems;
+
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+
+                var recommendedMenuItems = await menuItemService.GetRecommendationByMenuItemCategory(request.MenuItemCategoryId, request.Limit);
+
+                var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                menuItems = mapper.Map<List<MenuItem>, List<GetRecommendationMenuItemResponse>>(recommendedMenuItems);
+            }
+
+            return new CustomProtocolResponse
+            {
+                Status = "Success",
+                Body = JsonConvert.SerializeObject(menuItems)
+            };
+        }
     }
 
 }

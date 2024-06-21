@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using RecommendationEngine.Data.Entities;
 using Server.Models.Request;
+using Server.Models.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace Server.Models.DTO.Profiles
         {
             CreateMap<MenuItemModel, MenuItem>().ReverseMap();
             CreateMap<MenuItemModel, UpdateMenuItemRequestModel>().ReverseMap();
+            CreateMap<MenuItemModel, GetRecommendationMenuItemResponse>().ReverseMap();
             CreateMap<MenuItem, UpdateMenuItemRequestModel>().ReverseMap();
         }
     }

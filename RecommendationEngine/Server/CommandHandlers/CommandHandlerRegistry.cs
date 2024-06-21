@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Server.CommandHandlers.CommandHandlerDelegates;
+using RecommendationEngine.Data.Entities;
 
 namespace Server.CommandHandlers
 {
@@ -23,11 +24,13 @@ namespace Server.CommandHandlers
             CommandHandlers = new Dictionary<string, (CommandHandler, AuthorizationCheck)>
             {
                 { "Login", (body => HandleLogin(serviceProvider, body), role => true) },
-                { "AddMenuItem", (body => HandleAddMenuItem(serviceProvider, body), role => role == "Admin") },
-                { "UpdateMenuItem", (body => HandleUpdateMenuItem(serviceProvider, body), role => role == "Admin") },
-                { "DeleteMenuItem", (body => HandleDeleteMenuItem(serviceProvider, body), role => role == "Admin") },
-                { "ToggleMenuItemAvailability", (body => HandleToggleMenuItemAvailability(serviceProvider, body), role => role == "Admin") },
-                { "GetMenuItems", (body => HandleGetMenuItems(serviceProvider, body), role => role == "Admin") },
+                { "AddMenuItem", (body => HandleAddMenuItem(serviceProvider, body), role => role == Roles.Admin.ToString()) },
+                { "UpdateMenuItem", (body => HandleUpdateMenuItem(serviceProvider, body), role => role == Roles.Admin.ToString()) },
+                { "DeleteMenuItem", (body => HandleDeleteMenuItem(serviceProvider, body), role => role == Roles.Admin.ToString()) },
+                { "ToggleMenuItemAvailability", (body => HandleToggleMenuItemAvailability(serviceProvider, body), role => role == Roles.Admin.ToString()) },
+                { "GetMenuItems", (body => HandleGetMenuItems(serviceProvider, body), role => role == Roles.Admin.ToString()) },
+                { "RollOutMenuForNextDayForVoting", (body => HandleRollOutMenuForNextDayForVoting(serviceProvider, body), role => role == Roles.Chef.ToString()) },
+                { "GetRecommendation", (body => HandleGetRecommendation(serviceProvider, body), role => role == Roles.Chef.ToString()) },
                 // Add other commands and their authorization checks here
             };
         }
