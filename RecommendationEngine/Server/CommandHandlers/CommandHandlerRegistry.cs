@@ -29,8 +29,11 @@ namespace Server.CommandHandlers
                 { "DeleteMenuItem", (body => HandleDeleteMenuItem(serviceProvider, body), role => role == Roles.Admin.ToString()) },
                 { "ToggleMenuItemAvailability", (body => HandleToggleMenuItemAvailability(serviceProvider, body), role => role == Roles.Admin.ToString()) },
                 { "GetMenuItems", (body => HandleGetMenuItems(serviceProvider, body), role => role == Roles.Admin.ToString()) },
-                { "RollOutMenuForNextDayForVoting", (body => HandleRollOutMenuForNextDayForVoting(serviceProvider, body), role => role == Roles.Chef.ToString()) },
-                { "GetRecommendation", (body => HandleGetRecommendation(serviceProvider, body), role => role == Roles.Chef.ToString()) },
+                { "RollOutMenuForNextDayForVoting", (body => RollOutMenuForNextDayForVoting(serviceProvider, body), role => role == Roles.Chef.ToString()) },
+                { "GetRecommendation", (body => GetRecommendation(serviceProvider, body), role => role == Roles.Chef.ToString()) },
+                { "ViewVotesOnRolledOutMenuItems", (body => ViewVotesOnRolledOutMenuItems(serviceProvider, body), role => role == Roles.Chef.ToString()) },
+                { "GetRolledOutMenuItemsOfToday", (body => GetRolledOutMenuItemsOfToday(serviceProvider, body), role => role == Roles.User.ToString()) },
+                { "VoteForDailyMenuItem", (body => VoteForDailyMenuItem(serviceProvider, body), role => role == Roles.User.ToString()) },
                 // Add other commands and their authorization checks here
             };
         }

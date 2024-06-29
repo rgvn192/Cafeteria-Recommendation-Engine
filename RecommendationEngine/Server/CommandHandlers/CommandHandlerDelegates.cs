@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 using Server.Models.DTO;
 using AutoMapper;
 using RecommendationEngine.Data.Entities;
+using System.Linq.Expressions;
+using RecommendationEngine.Common.Exceptions;
+using RecommendationEngine.Common.Utils;
 
 namespace Server.CommandHandlers
 {
@@ -167,7 +170,7 @@ namespace Server.CommandHandlers
             };
         }
 
-        public async static Task<CustomProtocolResponse> HandleRollOutMenuForNextDayForVoting(IServiceProvider serviceProvider, string body)
+        public async static Task<CustomProtocolResponse> RollOutMenuForNextDayForVoting(IServiceProvider serviceProvider, string body)
         {
             try
             {
@@ -205,27 +208,159 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> HandleGetRecommendation(IServiceProvider serviceProvider, string body)
+        public async static Task<CustomProtocolResponse> GetRecommendation(IServiceProvider serviceProvider, string body)
         {
-            var request = JsonConvert.DeserializeObject<GetRecommendationRequestModel>(body);
-
-            List<GetRecommendationMenuItemResponse> menuItems;
-
-            using (var scope = serviceProvider.CreateScope())
+            try
             {
-                var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+                var request = JsonConvert.DeserializeObject<GetRecommendationRequestModel>(body);
 
-                var recommendedMenuItems = await menuItemService.GetRecommendationByMenuItemCategory(request.MenuItemCategoryId, request.Limit);
+                List<GetRecommendationMenuItemResponse> menuItems;
 
-                var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                menuItems = mapper.Map<List<MenuItem>, List<GetRecommendationMenuItemResponse>>(recommendedMenuItems);
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+
+                    var recommendedMenuItems = await menuItemService.GetRecommendationByMenuItemCategory(request.MenuItemCategoryId, request.Limit);
+
+                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                    menuItems = mapper.Map<List<MenuItem>, List<GetRecommendationMenuItemResponse>>(recommendedMenuItems);
+                }
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(menuItems)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex)
+                };
+            }
+        }
+
+        public async static Task<CustomProtocolResponse> VoteForDailyMenuItem(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+                var request = JsonConvert.DeserializeObject<VoteForDailyMenuItemRequest>(body);
+
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var voteService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemVoteService>();
+
+                    Expression<Func<DailyRolledOutMenuItemVote, bool>> predicate = v => v.UserId == request.UserId && v.DailyRolledOutMenuItemId == request.DailyRolledOutMenuItemId;
+                    var duplicateVote = await voteService.GetList<DailyRolledOutMenuItemVote>(predicate: predicate);
+
+                    if (duplicateVote != null && duplicateVote.Count != 0)
+                    {
+                        throw new AppException("Cannot Vote on already voted item");
+                    }
+
+                    var dailyMenuItemVote = new DailyRolledOutMenuItemVote()
+                    {
+                        DailyRolledOutMenuItemId = request.DailyRolledOutMenuItemId,
+                        UserId = request.UserId
+                    };
+                    var recommendedMenuItems = await voteService.Add(dailyMenuItemVote);
+                }
+
+                var response = new CommonServerResponse
+                {
+                    Status = "Success",
+                    Message = "Voted successfully."
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
+                };
             }
 
-            return new CustomProtocolResponse
+        }
+
+        public async static Task<CustomProtocolResponse> GetRolledOutMenuItemsOfToday(IServiceProvider serviceProvider, string body)
+        {
+            try
             {
-                Status = "Success",
-                Body = JsonConvert.SerializeObject(menuItems)
-            };
+
+                List<RolledOutMenuItem> menuItems;
+
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var rolledOutMenuItemService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemService>();
+
+                    var today = DateTime.UtcNow.Date;
+                    Expression<Func<DailyRolledOutMenuItem, bool>> predicate = m => m.CreatedDatetime.Date == today;
+
+                    var rolledOutMenuItems = await rolledOutMenuItemService.GetList<DailyRolledOutMenuItem>(include: $"{nameof(DailyRolledOutMenuItem.MenuItem)}", predicate: predicate);
+
+                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                    menuItems = mapper.Map<List<DailyRolledOutMenuItem>, List<RolledOutMenuItem>>(rolledOutMenuItems);
+                }
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonHelper.SerializeObjectIgnoringCycles(menuItems)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex)
+                };
+            }
+        }
+
+        public async static Task<CustomProtocolResponse> ViewVotesOnRolledOutMenuItems(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+
+                List<ViewVotesOnRolledOutMenuItemsResponse> menuItems;
+
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var rolledOutMenuItemService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemService>();
+
+                    var today = DateTime.UtcNow.Date;
+                    Expression<Func<DailyRolledOutMenuItem, bool>> predicate = m => m.CreatedDatetime.Date == today;
+
+                    var rolledOutMenuItems = await rolledOutMenuItemService.GetList<DailyRolledOutMenuItem>(include: $"{nameof(DailyRolledOutMenuItem.MenuItem)}, {nameof(DailyRolledOutMenuItem.DailyRolledOutMenuItemVotes)}", predicate : predicate);
+
+                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                    menuItems = mapper.Map<List<DailyRolledOutMenuItem>, List<ViewVotesOnRolledOutMenuItemsResponse>>(rolledOutMenuItems);
+                }
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonHelper.SerializeObjectIgnoringCycles(menuItems)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex)
+                };
+            }
         }
     }
 

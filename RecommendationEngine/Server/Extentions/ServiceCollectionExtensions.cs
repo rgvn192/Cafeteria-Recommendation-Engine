@@ -18,6 +18,8 @@ namespace Server.Extentions
             services.AddScoped<IAuthorisationService, AuthorisationService>();
             services.AddScoped<IMenuItemService, MenuItemService>();
             services.AddScoped<IDailyRolledOutMenuItemService, DailyRolledOutMenuItemService>();
+            services.AddScoped<IDailyRolledOutMenuItemVoteService, DailyRolledOutMenuItemVoteService>();
+            services.AddScoped<IFeedbackService, FeedBackService>();
             return services;
         }
     }

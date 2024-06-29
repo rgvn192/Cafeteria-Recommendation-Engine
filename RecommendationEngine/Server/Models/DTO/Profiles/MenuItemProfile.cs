@@ -17,6 +17,7 @@ namespace Server.Models.DTO.Profiles
             CreateMap<MenuItemModel, MenuItem>().ReverseMap();
             CreateMap<MenuItemModel, UpdateMenuItemRequestModel>().ReverseMap();
             CreateMap<MenuItemModel, GetRecommendationMenuItemResponse>().ReverseMap();
+            CreateMap<MenuItem, GetRecommendationMenuItemResponse>().ReverseMap();
             CreateMap<MenuItem, UpdateMenuItemRequestModel>().ReverseMap();
         }
     }

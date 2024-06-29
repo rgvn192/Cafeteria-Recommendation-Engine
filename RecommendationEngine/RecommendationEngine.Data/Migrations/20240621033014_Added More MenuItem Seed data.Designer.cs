@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecommendationEngine.Data;
 
@@ -11,9 +12,10 @@ using RecommendationEngine.Data;
 namespace RecommendationEngine.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240621033014_Added More MenuItem Seed data")]
+    partial class AddedMoreMenuItemSeeddata
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -750,7 +752,7 @@ namespace RecommendationEngine.Data.Migrations
             modelBuilder.Entity("RecommendationEngine.Data.Entities.DailyRolledOutMenuItemVote", b =>
                 {
                     b.HasOne("RecommendationEngine.Data.Entities.DailyRolledOutMenuItem", "DailyRolledOutMenuItem")
-                        .WithMany("DailyRolledOutMenuItemVotes")
+                        .WithMany()
                         .HasForeignKey("DailyRolledOutMenuItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -824,11 +826,6 @@ namespace RecommendationEngine.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("RecommendationEngine.Data.Entities.DailyRolledOutMenuItem", b =>
-                {
-                    b.Navigation("DailyRolledOutMenuItemVotes");
                 });
 
             modelBuilder.Entity("RecommendationEngine.Data.Entities.MealType", b =>

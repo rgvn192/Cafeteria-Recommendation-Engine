@@ -32,32 +32,44 @@ namespace RecommendationEngine.Data.Extentions
             );
 
             modelBuilder.Entity<MenuItem>().HasData(
-                new MenuItem { MenuItemId = 1, Name = "Poha", Price = 40.00m, MenuItemCategoryId = 1 },
-                new MenuItem { MenuItemId = 2, Name = "Upma", Price = 40.00m, MenuItemCategoryId = 1 },
-                new MenuItem { MenuItemId = 3, Name = "Fried Idli", Price = 40.00m, MenuItemCategoryId = 1 },
+                new MenuItem { MenuItemId = 1, Name = "Poha", Price = 40.00m, MenuItemCategoryId = 1, AverageRating = 4.5m, UserLikeability = 4.7m },
+                new MenuItem { MenuItemId = 2, Name = "Upma", Price = 40.00m, MenuItemCategoryId = 1, AverageRating = 4.3m, UserLikeability = 4.6m },
+                new MenuItem { MenuItemId = 3, Name = "Fried Idli", Price = 40.00m, MenuItemCategoryId = 1, AverageRating = 4.0m, UserLikeability = 4.2m },
 
                 // Main Courses
-                new MenuItem { MenuItemId = 4, Name = "Moong Daal", Price = 40.00m, MenuItemCategoryId = 2 },
-                new MenuItem { MenuItemId = 5, Name = "Paneer lababdar", Price = 40.00m, MenuItemCategoryId = 2 },
-                new MenuItem { MenuItemId = 6, Name = "Vegetable Biryani", Price = 100.00m, MenuItemCategoryId = 2 },
-                new MenuItem { MenuItemId = 7, Name = "Palak Paneer", Price = 90.00m, MenuItemCategoryId = 2 },
-                new MenuItem { MenuItemId = 8, Name = "Mix Veg", Price = 90.00m, MenuItemCategoryId = 2 },
+                new MenuItem { MenuItemId = 4, Name = "Moong Daal", Price = 40.00m, MenuItemCategoryId = 2, AverageRating = 4.4m, UserLikeability = 4.5m },
+                new MenuItem { MenuItemId = 5, Name = "Paneer lababdar", Price = 40.00m, MenuItemCategoryId = 2, AverageRating = 4.7m, UserLikeability = 4.8m },
+                new MenuItem { MenuItemId = 6, Name = "Vegetable Biryani", Price = 100.00m, MenuItemCategoryId = 2, AverageRating = 4.8m, UserLikeability = 4.9m },
+                new MenuItem { MenuItemId = 7, Name = "Palak Paneer", Price = 90.00m, MenuItemCategoryId = 2, AverageRating = 4.5m, UserLikeability = 4.6m },
+                new MenuItem { MenuItemId = 8, Name = "Mix Veg", Price = 90.00m, MenuItemCategoryId = 2, AverageRating = 4.3m, UserLikeability = 4.4m },
+
+                // Adding some low scoring items
+                new MenuItem { MenuItemId = 18, Name = "Aloo Gobi", Price = 50.00m, MenuItemCategoryId = 2, AverageRating = 2.5m, UserLikeability = 2.7m },
+                new MenuItem { MenuItemId = 19, Name = "Kadhi Pakoda", Price = 60.00m, MenuItemCategoryId = 2, AverageRating = 2.8m, UserLikeability = 3.0m },
 
                 // Breads
-                new MenuItem { MenuItemId = 9, Name = "Naan", Price = 15.00m, MenuItemCategoryId = 3 },
-                new MenuItem { MenuItemId = 10, Name = "Roti", Price = 10.00m, MenuItemCategoryId = 3 },
-                new MenuItem { MenuItemId = 12, Name = "Paratha", Price = 20.00m, MenuItemCategoryId = 3 },
+                new MenuItem { MenuItemId = 9, Name = "Naan", Price = 15.00m, MenuItemCategoryId = 3, AverageRating = 4.6m, UserLikeability = 4.7m },
+                new MenuItem { MenuItemId = 10, Name = "Roti", Price = 10.00m, MenuItemCategoryId = 3, AverageRating = 4.4m, UserLikeability = 4.5m },
+                new MenuItem { MenuItemId = 12, Name = "Paratha", Price = 20.00m, MenuItemCategoryId = 3, AverageRating = 4.7m, UserLikeability = 4.8m },
+
+                // Adding some low scoring items
+                new MenuItem { MenuItemId = 20, Name = "Butter Naan", Price = 25.00m, MenuItemCategoryId = 3, AverageRating = 3.0m, UserLikeability = 3.2m },
+                new MenuItem { MenuItemId = 21, Name = "Plain Paratha", Price = 15.00m, MenuItemCategoryId = 3, AverageRating = 3.3m, UserLikeability = 3.5m },
 
                 // Beverages
-                new MenuItem { MenuItemId = 13, Name = "Masala Chai", Price = 15.00m, MenuItemCategoryId = 4 },
-                new MenuItem { MenuItemId = 14, Name = "Mango Lassi", Price = 25.00m, MenuItemCategoryId = 4 },
+                new MenuItem { MenuItemId = 13, Name = "Masala Chai", Price = 15.00m, MenuItemCategoryId = 4, AverageRating = 4.8m, UserLikeability = 4.9m },
+                new MenuItem { MenuItemId = 14, Name = "Mango Lassi", Price = 25.00m, MenuItemCategoryId = 4, AverageRating = 4.6m, UserLikeability = 4.7m },
 
                 // Side Dishes
-                new MenuItem { MenuItemId = 15, Name = "Cucumber Raita", Price = 20.00m, MenuItemCategoryId = 5 },
-                new MenuItem { MenuItemId = 16, Name = "Mixed Vegetable Salad", Price = 30.00m, MenuItemCategoryId = 5 },
-                new MenuItem { MenuItemId = 17, Name = "Steamed Basmati Rice", Price = 25.00m, MenuItemCategoryId = 5 }
+                new MenuItem { MenuItemId = 15, Name = "Cucumber Raita", Price = 20.00m, MenuItemCategoryId = 5, AverageRating = 4.5m, UserLikeability = 4.6m },
+                new MenuItem { MenuItemId = 16, Name = "Mixed Vegetable Salad", Price = 30.00m, MenuItemCategoryId = 5, AverageRating = 4.7m, UserLikeability = 4.8m },
+                new MenuItem { MenuItemId = 17, Name = "Steamed Basmati Rice", Price = 25.00m, MenuItemCategoryId = 5, AverageRating = 4.3m, UserLikeability = 4.4m },
 
+                // Adding some low scoring items
+                new MenuItem { MenuItemId = 22, Name = "Plain Curd", Price = 10.00m, MenuItemCategoryId = 5, AverageRating = 3.5m, UserLikeability = 3.6m },
+                new MenuItem { MenuItemId = 23, Name = "Green Salad", Price = 20.00m, MenuItemCategoryId = 5, AverageRating = 3.2m, UserLikeability = 3.4m }
             );
+
 
             modelBuilder.Entity<NotificationType>().HasData(
                 new NotificationType { NotificationTypeId = 1, Name = NotificationTypes.MenuItemVoting },
