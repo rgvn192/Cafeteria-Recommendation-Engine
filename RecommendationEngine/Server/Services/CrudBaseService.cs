@@ -83,7 +83,7 @@ namespace Server.Services
                 };
 
                 throw new AppException(ErrorResponse.ErrorEnum.Validation,
-                    LogExtensions.GetLogMessage(nameof(Update), paramDict, nameof(id).GetInvalidIntLog()), null, _logger);
+                    LogExtensions.GetLogMessage(nameof(GetById), paramDict, nameof(id).GetInvalidIntLog()), null, _logger);
             }
 
             var entity = await _crudBaseRepository.GetById(id, include);
@@ -131,7 +131,7 @@ namespace Server.Services
                 };
 
                 throw new AppException(ErrorResponse.ErrorEnum.Validation,
-                    LogExtensions.GetLogMessage(nameof(Update), paramDict, nameof(id).GetInvalidIntLog()), null, _logger);
+                    LogExtensions.GetLogMessage(nameof(Delete), paramDict, nameof(id).GetInvalidIntLog()), null, _logger);
             }
 
             return await _crudBaseRepository.Delete(id);
@@ -146,7 +146,7 @@ namespace Server.Services
                   { nameof(entity), JsonSerializer.Serialize(entity) },
                 };
                 throw new AppException(ErrorResponse.ErrorEnum.NullObject,
-                   LogExtensions.GetLogMessage(nameof(GetById), paramDict, nameof(entity).GetNullOrEmptyLog()), null, _logger);
+                   LogExtensions.GetLogMessage(nameof(Delete), paramDict, nameof(entity).GetNullOrEmptyLog()), null, _logger);
             }
 
             return await _crudBaseRepository.Delete(entity);
