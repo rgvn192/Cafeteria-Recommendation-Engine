@@ -20,8 +20,8 @@ namespace RecommendationEngine.Data.Entities
 
     public enum Roles
     {
-        Chef,
-        Admin,
-        User
+        Chef = 3,
+        Admin = 2,
+        User = 1
     }
 }

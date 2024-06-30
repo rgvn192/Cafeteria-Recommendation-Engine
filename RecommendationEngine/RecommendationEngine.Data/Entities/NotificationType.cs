@@ -22,9 +22,9 @@ namespace RecommendationEngine.Data.Entities
 
     public enum NotificationTypes
     {
-        NewMenuItemAdded,
-        MenuItemAvailabilityUpdated,
-        MenuItemVoting,
-        FinalizeMenu
+        NewMenuItemAdded = 1,
+        MenuItemAvailabilityUpdated = 2,
+        MenuItemVoting = 3,
+        FinalizeMenu = 4
     }
 }

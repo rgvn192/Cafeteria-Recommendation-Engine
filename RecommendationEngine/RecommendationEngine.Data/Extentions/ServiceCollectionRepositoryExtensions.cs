@@ -19,6 +19,7 @@ namespace RecommendationEngine.Data.Extentions
             services.AddScoped<IDailyRolledOutMenuItemRepository, DailyRolledOutMenuItemRepository>();
             services.AddScoped<IDailyRolledOutMenuItemVoteRepository, DailyRolledOutMenuItemVoteRepository>();
             services.AddScoped<IFeedbackRepository, FeedbackRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             return services;
         }
     }

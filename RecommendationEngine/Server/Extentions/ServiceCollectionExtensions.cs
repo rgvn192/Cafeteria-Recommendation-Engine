@@ -20,6 +20,7 @@ namespace Server.Extentions
             services.AddScoped<IDailyRolledOutMenuItemService, DailyRolledOutMenuItemService>();
             services.AddScoped<IDailyRolledOutMenuItemVoteService, DailyRolledOutMenuItemVoteService>();
             services.AddScoped<IFeedbackService, FeedBackService>();
+            services.AddScoped<INotificationService, NotificationService>();
             return services;
         }
     }
