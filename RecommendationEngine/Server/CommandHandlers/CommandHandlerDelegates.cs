@@ -265,7 +265,7 @@ namespace Server.CommandHandlers
                         DailyRolledOutMenuItemId = request.DailyRolledOutMenuItemId,
                         UserId = request.UserId
                     };
-                    var recommendedMenuItems = await voteService.Add(dailyMenuItemVote);
+                    await voteService.Add(dailyMenuItemVote);
                 }
 
                 var response = new CommonServerResponse
@@ -427,7 +427,7 @@ namespace Server.CommandHandlers
                         var finalizedMenuItem = new ViewFinalizedRolledOutMenuItemsResponse()
                         {
                             MenuItem = menuItemModel,
-                            Mealtype = menuItem.MealType.Name.ToString(),   
+                            Mealtype = menuItem.MealType.Name.ToString(),
                         };
                         finalizedMenuItems.Add(finalizedMenuItem);
                     }
@@ -437,6 +437,41 @@ namespace Server.CommandHandlers
                 {
                     Status = "Success",
                     Body = JsonHelper.SerializeObjectIgnoringCycles(finalizedMenuItems)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex)
+                };
+            }
+        }
+
+        public async static Task<CustomProtocolResponse> GiveFeedBackOnMenuItem(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+                var request = JsonConvert.DeserializeObject<FeedbackModel>(body);
+
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var feedbackService = scope.ServiceProvider.GetRequiredService<IFeedbackService>();
+
+                    await feedbackService.AddFeedBackForMenuItem(request);
+                }
+
+                var response = new CommonServerResponse
+                {
+                    Status = "Success",
+                    Message = "Successfully Submitted Feedback."
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
                 };
             }
             catch (Exception ex)

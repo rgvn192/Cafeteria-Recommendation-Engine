@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using RecommendationEngine.Data.Entities;
 using RecommendationEngine.Data.Interface;
 using Server.Interface;
+using Server.Models.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,5 +24,11 @@ namespace Server.Services
             nameof(Feedback.Comment),
             nameof(Feedback.Rating)
         };
+
+        public async Task AddFeedBackForMenuItem(FeedbackModel feedback)
+        {
+            await Add(feedback);
+            //Update Menu Item on the basis of Comment and Rating.
+        }
     }
 }

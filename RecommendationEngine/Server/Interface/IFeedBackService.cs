@@ -1,4 +1,5 @@
 ﻿using RecommendationEngine.Data.Entities;
+using Server.Models.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +10,6 @@ namespace Server.Interface
 {
     public interface IFeedbackService : ICrudBaseService<Feedback>
     {
+        Task AddFeedBackForMenuItem(FeedbackModel feedback);
     }
 }
