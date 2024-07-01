@@ -22,7 +22,9 @@ namespace RecommendationEngine.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<NotificationType> NotificationTypes { get; set; }
         public DbSet<DailyRolledOutMenuItemVote> DailyRolledOutMenuItemVotes { get; set; }
-
+        public DbSet<Characteristic> Characteristics { get; set; }
+        public DbSet<MenuItemCharacteristic> MenuItemCharacteristicMappings { get; set; }
+        public DbSet<UserPreference> UserPreferenceMappings { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
@@ -39,6 +41,9 @@ namespace RecommendationEngine.Data
             modelBuilder.ApplyConfiguration(new MealTypeConfiguration());
             modelBuilder.ApplyConfiguration(new NotificationTypeConfiguration());
             modelBuilder.ApplyConfiguration(new NotificationConfiguration());
+            modelBuilder.ApplyConfiguration(new CharacteristicConfiguration());
+            modelBuilder.ApplyConfiguration(new UserPreferenceConfiguration());
+            modelBuilder.ApplyConfiguration(new MenuItemCharacteristicConfiguration());
 
             modelBuilder.Seed();
         }

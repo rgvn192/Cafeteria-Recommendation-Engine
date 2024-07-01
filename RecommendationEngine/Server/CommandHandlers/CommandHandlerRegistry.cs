@@ -28,7 +28,7 @@ namespace Server.CommandHandlers
                 { "UpdateMenuItem", (body => HandleUpdateMenuItem(serviceProvider, body), role => role == Roles.Admin.ToString()) },
                 { "DeleteMenuItem", (body => HandleDeleteMenuItem(serviceProvider, body), role => role == Roles.Admin.ToString()) },
                 { "ToggleMenuItemAvailability", (body => HandleToggleMenuItemAvailability(serviceProvider, body), role => role == Roles.Admin.ToString()) },
-                { "GetMenuItems", (body => HandleGetMenuItems(serviceProvider, body), role => role == Roles.Admin.ToString()) },
+                { "GetMenuItems", (body => HandleGetMenuItems(serviceProvider, body), role => role == Roles.Admin.ToString() || role == Roles.Chef.ToString()) },
                 { "RollOutMenuForNextDayForVoting", (body => RollOutMenuForNextDayForVoting(serviceProvider, body), role => role == Roles.Chef.ToString()) },
                 { "GetRecommendation", (body => GetRecommendation(serviceProvider, body), role => role == Roles.Chef.ToString()) },
                 { "ViewVotesOnRolledOutMenuItems", (body => ViewVotesOnRolledOutMenuItems(serviceProvider, body), role => role == Roles.Chef.ToString()) },
