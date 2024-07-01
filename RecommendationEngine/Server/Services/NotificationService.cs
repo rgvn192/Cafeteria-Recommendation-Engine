@@ -46,11 +46,14 @@ namespace Server.Services
 
         public async Task<List<NotificationModel>> GetNotificationsForUser(int userId)
         {
-            var user = await GetById<User>(userId) ?? throw new AppException(ErrorResponse.ErrorEnum.NotFound,
+            var user = await _userService.GetById<User>(userId) ?? throw new AppException(ErrorResponse.ErrorEnum.NotFound,
                     LogExtensions.GetLogMessage(nameof(GetNotificationsForUser), null, "No such user found"));
 
             Expression<Func<Notification, bool>> predicate = n => n.UserId == user.UserId && n.CreatedDatetime > user.LastSeenNotificationAt;
             var notifications = await GetList<NotificationModel>(predicate: predicate);
+
+            user.LastSeenNotificationAt = DateTime.UtcNow;
+            await _userService.Update(userId, user);
 
             return notifications;
         }

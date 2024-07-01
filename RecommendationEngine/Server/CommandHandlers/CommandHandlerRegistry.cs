@@ -37,6 +37,8 @@ namespace Server.CommandHandlers
                 { "ViewFinalizedRolledOutMenuItems", (body => ViewFinalizedRolledOutMenuItems(serviceProvider, body), role => role == Roles.User.ToString()) },
                 { "GiveFeedBackOnMenuItem", (body => GiveFeedBackOnMenuItem(serviceProvider, body), role => role == Roles.User.ToString()) },
                 { "ShortListDailyMenuItem", (body => ShortListDailyMenuItem(serviceProvider, body), role => role == Roles.Chef.ToString()) },
+                { "GetNotificationsForUser", (body => GetNotificationsForUser(serviceProvider, body), role => role == Roles.Chef.ToString() || role == Roles.User.ToString() || role == Roles.Admin.ToString())},
+                { "IssueNotificationForFinalizedMenu", (body => IssueNotificationForFinalizedMenu(serviceProvider, body), role => role == Roles.Chef.ToString())},
                 // Add other commands and their authorization checks here
             };
         }

@@ -52,6 +52,15 @@ namespace Server.CommandHandlers
                 var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
 
                 await menuItemService.Add(request);
+
+                var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                List<int> roles = new()
+                    {
+                        (int)Roles.User,
+                        (int)Roles.Chef
+                    };
+                await notificationService.IssueNotifications(NotificationTypes.NewMenuItemAdded, $"{request?.Name} has been added to Menu", roles);
             }
 
             var response = new AddMenuItemResponseModel
@@ -152,9 +161,21 @@ namespace Server.CommandHandlers
             using (var scope = serviceProvider.CreateScope())
             {
                 var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
-                var menuItem = await menuItemService.GetById<MenuItemModel>(request);
+                var menuItem = await menuItemService.GetById<MenuItemModel>(request)?? throw new AppException(ErrorResponse.ErrorEnum.NotFound,
+                    LogExtensions.GetLogMessage(nameof(HandleToggleMenuItemAvailability), null, "No such Menu Item found"));
+
                 menuItem.IsAvailable = !menuItem.IsAvailable;
                 await menuItemService.Update(menuItem.MenuItemId, menuItem);
+
+                var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                List<int> roles = new()
+                    {
+                        (int)Roles.User,
+                        (int)Roles.Chef
+                    };
+                string availability = menuItem.IsAvailable ? "is now available" : "is now not available";
+                await notificationService.IssueNotifications(NotificationTypes.MenuItemAvailabilityUpdated, $"{menuItem?.Name} {availability} in the menu item", roles);
             }
 
             var response = new CommonServerResponse
@@ -184,6 +205,15 @@ namespace Server.CommandHandlers
 
                     var dailyRolledOuts = mapper.Map<List<DailyRolledOutMenuItemRequestModel>, List<DailyRolledOutMenuItem>>(request);
                     await dailyRolledOutMenuItemService.AddRange(dailyRolledOuts);
+
+                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    var tomorrow = DateTime.UtcNow.Date.AddDays(1);
+                    List<int> roles = new List<int>()
+                    {
+                        (int)Roles.User
+                    };
+                    await notificationService.IssueNotifications(NotificationTypes.MenuItemVoting, $"The Menu for {tomorrow.ToShortDateString()} has been rolled out for voting.", roles);
                 }
 
                 var response = new CommonServerResponse
@@ -466,6 +496,74 @@ namespace Server.CommandHandlers
                 {
                     Status = "Success",
                     Message = "Successfully Submitted Feedback."
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex)
+                };
+            }
+        }
+
+        public async static Task<CustomProtocolResponse> GetNotificationsForUser(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+                var userId = JsonConvert.DeserializeObject<int>(body);
+                List<NotificationModel> notifications;
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    notifications = await notificationService.GetNotificationsForUser(userId);
+                }
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonHelper.SerializeObjectIgnoringCycles(notifications)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex)
+                };
+            }
+        }
+
+        public async static Task<CustomProtocolResponse> IssueNotificationForFinalizedMenu(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    var tomorrow = DateTime.UtcNow.Date.AddDays(1);
+                    string tomorrowDate = tomorrow.ToShortDateString();
+                    List<int> roles = new List<int>()
+                    {
+                        (int)Roles.User
+                    };
+                    await notificationService.IssueNotifications(NotificationTypes.FinalizeMenu, $"The Menu for {tomorrowDate} has been finalized.", roles);
+                }
+
+                var response = new CommonServerResponse
+                {
+                    Status = "Success",
+                    Message = "Successfully Issued Notification for Finalized Menu"
                 };
 
                 return new CustomProtocolResponse
