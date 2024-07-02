@@ -31,5 +31,7 @@ namespace RecommendationEngine.Data.Entities
         public MenuItemCategory MenuItemCategory { get; set; }
         public List<Feedback> Feedbacks { get; set; }
         public List<DailyRolledOutMenuItem> DailyRolledOutMenuItems { get; set; }
+
+        public List<MenuItemCharacteristic> Characteristics { get; set; }
     }
 }

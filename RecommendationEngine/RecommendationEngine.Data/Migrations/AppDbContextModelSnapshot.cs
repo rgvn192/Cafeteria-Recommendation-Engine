@@ -1390,7 +1390,7 @@ namespace RecommendationEngine.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("RecommendationEngine.Data.Entities.MenuItem", "MenuItem")
-                        .WithMany()
+                        .WithMany("Characteristics")
                         .HasForeignKey("MenuItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1439,7 +1439,7 @@ namespace RecommendationEngine.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("RecommendationEngine.Data.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Preferences")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1468,6 +1468,8 @@ namespace RecommendationEngine.Data.Migrations
 
             modelBuilder.Entity("RecommendationEngine.Data.Entities.MenuItem", b =>
                 {
+                    b.Navigation("Characteristics");
+
                     b.Navigation("DailyRolledOutMenuItems");
 
                     b.Navigation("Feedbacks");
@@ -1495,6 +1497,8 @@ namespace RecommendationEngine.Data.Migrations
                     b.Navigation("Feedbacks");
 
                     b.Navigation("Notifications");
+
+                    b.Navigation("Preferences");
                 });
 #pragma warning restore 612, 618
         }

@@ -33,6 +33,7 @@ namespace Server.CommandHandlers
                 { "GetRecommendation", (body => GetRecommendation(serviceProvider, body), role => role == Roles.Chef.ToString()) },
                 { "ViewVotesOnRolledOutMenuItems", (body => ViewVotesOnRolledOutMenuItems(serviceProvider, body), role => role == Roles.Chef.ToString()) },
                 { "GetRolledOutMenuItemsOfToday", (body => GetRolledOutMenuItemsOfToday(serviceProvider, body), role => role == Roles.User.ToString()) },
+                { "GetRolledOutMenuItemsOfTodayForUser", (body => GetRolledOutMenuItemsOfTodayForUser(serviceProvider, body), role => role == Roles.User.ToString()) },
                 { "VoteForDailyMenuItem", (body => VoteForDailyMenuItem(serviceProvider, body), role => role == Roles.User.ToString()) },
                 { "ViewFinalizedRolledOutMenuItems", (body => ViewFinalizedRolledOutMenuItems(serviceProvider, body), role => role == Roles.User.ToString()) },
                 { "GiveFeedBackOnMenuItem", (body => GiveFeedBackOnMenuItem(serviceProvider, body), role => role == Roles.User.ToString()) },

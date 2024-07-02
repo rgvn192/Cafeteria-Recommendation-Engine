@@ -9,5 +9,6 @@ namespace Server.Interface
 {
     public interface IDailyRolledOutMenuItemService : ICrudBaseService<DailyRolledOutMenuItem>
     {
+        Task<List<DailyRolledOutMenuItem>> GetRolledOutMenuItemsForUser(int userId);
     }
 }

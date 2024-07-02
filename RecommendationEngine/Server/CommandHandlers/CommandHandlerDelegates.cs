@@ -357,6 +357,40 @@ namespace Server.CommandHandlers
             }
         }
 
+        public async static Task<CustomProtocolResponse> GetRolledOutMenuItemsOfTodayForUser(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+                var userId = JsonConvert.DeserializeObject<int>(body);
+
+                List<RolledOutMenuItem> menuItems;
+
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var rolledOutMenuItemService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemService>();
+
+                    var rolledOutMenuItems = await rolledOutMenuItemService.GetRolledOutMenuItemsForUser(userId);
+
+                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                    menuItems = mapper.Map<List<DailyRolledOutMenuItem>, List<RolledOutMenuItem>>(rolledOutMenuItems);
+                }
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonHelper.SerializeObjectIgnoringCycles(menuItems)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex)
+                };
+            }
+        }
+
         public async static Task<CustomProtocolResponse> ViewVotesOnRolledOutMenuItems(IServiceProvider serviceProvider, string body)
         {
             try

@@ -12,5 +12,7 @@ namespace Server.Models.Response
         public int DailyRolledOutMenuItemId { get; set; }
 
         public MenuItem MenuItem { get; set; }
+
+        public MealType MealType { get; set; }
     }
 }
