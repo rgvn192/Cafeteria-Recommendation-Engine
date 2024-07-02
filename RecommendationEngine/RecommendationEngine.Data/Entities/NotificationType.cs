@@ -25,6 +25,7 @@ namespace RecommendationEngine.Data.Entities
         NewMenuItemAdded = 1,
         MenuItemAvailabilityUpdated = 2,
         MenuItemVoting = 3,
-        FinalizeMenu = 4
+        FinalizeMenu = 4,
+        DiscardMenuUpdated = 5
     }
 }

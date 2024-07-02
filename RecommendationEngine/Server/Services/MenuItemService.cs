@@ -32,6 +32,7 @@ namespace Server.Services
             nameof(MenuItem.UserLikeability),
             nameof(MenuItem.AverageRating),
             nameof(MenuItem.Comments),
+            nameof(MenuItem.IsDeleted)
         };
 
         public async Task<List<MenuItem>> GetRecommendationByMenuItemCategory(int menuItemCategory, int limit)
@@ -58,7 +59,7 @@ namespace Server.Services
 
         private async Task<List<MenuItem>> GetMenuItemsByCategory(int menuItemCategory)
         {
-            Expression<Func<MenuItem, bool>> predicate = m => m.MenuItemCategoryId == menuItemCategory && m.IsAvailable == true;
+            Expression<Func<MenuItem, bool>> predicate = m => m.MenuItemCategoryId == menuItemCategory && m.IsAvailable == true && m.IsDeleted == false;
             return await GetList<MenuItem>(predicate: predicate);
         }
 

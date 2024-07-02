@@ -161,7 +161,7 @@ namespace Server.CommandHandlers
             using (var scope = serviceProvider.CreateScope())
             {
                 var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
-                var menuItem = await menuItemService.GetById<MenuItemModel>(request)?? throw new AppException(ErrorResponse.ErrorEnum.NotFound,
+                var menuItem = await menuItemService.GetById<MenuItemModel>(request) ?? throw new AppException(ErrorResponse.ErrorEnum.NotFound,
                     LogExtensions.GetLogMessage(nameof(HandleToggleMenuItemAvailability), null, "No such Menu Item found"));
 
                 menuItem.IsAvailable = !menuItem.IsAvailable;
@@ -612,6 +612,39 @@ namespace Server.CommandHandlers
                 {
                     Status = "Failure",
                     Body = JsonConvert.SerializeObject(ex)
+                };
+            }
+        }
+
+        public async static Task<CustomProtocolResponse> GenerateDiscardedMenuItems(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var discardedMenuItemService = scope.ServiceProvider.GetRequiredService<IDiscardedMenuItemService>();
+
+                    await discardedMenuItemService.GenerateDiscardedMenuItemsForThisMonth();
+                }
+
+                var response = new CommonServerResponse
+                {
+                    Status = "Success",
+                    Message = "Successfully Generated Discarded Menu."
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
                 };
             }
         }

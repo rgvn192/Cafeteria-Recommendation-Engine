@@ -40,7 +40,7 @@ namespace Server.CommandHandlers
                 { "ShortListDailyMenuItem", (body => ShortListDailyMenuItem(serviceProvider, body), role => role == Roles.Chef.ToString()) },
                 { "GetNotificationsForUser", (body => GetNotificationsForUser(serviceProvider, body), role => role == Roles.Chef.ToString() || role == Roles.User.ToString() || role == Roles.Admin.ToString())},
                 { "IssueNotificationForFinalizedMenu", (body => IssueNotificationForFinalizedMenu(serviceProvider, body), role => role == Roles.Chef.ToString())},
-                // Add other commands and their authorization checks here
+                { "GenerateDiscardedMenuItems", (body => GenerateDiscardedMenuItems(serviceProvider, body), role => role == Roles.Chef.ToString())},
             };
         }
     }

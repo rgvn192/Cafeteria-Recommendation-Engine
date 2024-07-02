@@ -25,6 +25,8 @@ namespace RecommendationEngine.Data
         public DbSet<Characteristic> Characteristics { get; set; }
         public DbSet<MenuItemCharacteristic> MenuItemCharacteristicMappings { get; set; }
         public DbSet<UserPreference> UserPreferenceMappings { get; set; }
+        public DbSet<DiscardedMenuItem> DiscardedMenuItems { get; set; }
+        public DbSet<DiscardedMenuItemFeedback> DiscardedMenuItemFeedbacks { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
@@ -44,6 +46,8 @@ namespace RecommendationEngine.Data
             modelBuilder.ApplyConfiguration(new CharacteristicConfiguration());
             modelBuilder.ApplyConfiguration(new UserPreferenceConfiguration());
             modelBuilder.ApplyConfiguration(new MenuItemCharacteristicConfiguration());
+            modelBuilder.ApplyConfiguration(new DiscardedMenuItemConfiguration());
+            modelBuilder.ApplyConfiguration(new DiscardedMenuItemFeedbackConfiguration());
 
             modelBuilder.Seed();
         }

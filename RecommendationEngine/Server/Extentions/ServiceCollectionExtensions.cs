@@ -21,6 +21,8 @@ namespace Server.Extentions
             services.AddScoped<IDailyRolledOutMenuItemVoteService, DailyRolledOutMenuItemVoteService>();
             services.AddScoped<IFeedbackService, FeedBackService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IDiscardedMenuItemService, DiscardedMenuItemService>();
+            services.AddScoped<IDiscardedMenuItemFeedbackService, DiscardedMenuItemFeedbackService>();
             return services;
         }
     }

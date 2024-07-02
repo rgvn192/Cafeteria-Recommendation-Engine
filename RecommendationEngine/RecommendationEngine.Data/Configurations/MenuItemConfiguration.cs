@@ -12,6 +12,7 @@ namespace RecommendationEngine.Data.Configurations
         {
             base.Configure(builder);
             builder.Property(x => x.IsAvailable).HasDefaultValue(true);
+            builder.Property(x => x.IsDeleted).HasDefaultValue(false);
             builder.HasIndex(x => x.Name).IsUnique();
         }
     }

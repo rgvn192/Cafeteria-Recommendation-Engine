@@ -124,7 +124,8 @@ namespace RecommendationEngine.Data.Extentions
                 new NotificationType { NotificationTypeId = 1, Name = NotificationTypes.MenuItemVoting },
                 new NotificationType { NotificationTypeId = 2, Name = NotificationTypes.FinalizeMenu },
                 new NotificationType { NotificationTypeId = 3, Name = NotificationTypes.NewMenuItemAdded },
-                new NotificationType { NotificationTypeId = 4, Name = NotificationTypes.MenuItemAvailabilityUpdated }
+                new NotificationType { NotificationTypeId = 4, Name = NotificationTypes.MenuItemAvailabilityUpdated },
+                new NotificationType { NotificationTypeId = 5, Name = NotificationTypes.DiscardMenuUpdated }
 
             );
 

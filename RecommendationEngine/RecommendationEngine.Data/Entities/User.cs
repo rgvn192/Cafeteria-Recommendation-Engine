@@ -30,6 +30,6 @@ namespace RecommendationEngine.Data.Entities
         public List<Feedback> Feedbacks { get; set; }
         public List<DailyRolledOutMenuItemVote> DailyRolledOutMenuItemVotes { get; set; }
         public List<UserPreference> Preferences { get; set; }
-
+        public List<DiscardedMenuItemFeedback> DiscardedMenuItemFeedbacks { get; set; }
     }
 }
