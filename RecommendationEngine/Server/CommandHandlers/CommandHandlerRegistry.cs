@@ -41,6 +41,9 @@ namespace Server.CommandHandlers
                 { "GetNotificationsForUser", (body => GetNotificationsForUser(serviceProvider, body), role => role == Roles.Chef.ToString() || role == Roles.User.ToString() || role == Roles.Admin.ToString())},
                 { "IssueNotificationForFinalizedMenu", (body => IssueNotificationForFinalizedMenu(serviceProvider, body), role => role == Roles.Chef.ToString())},
                 { "GenerateDiscardedMenuItems", (body => GenerateDiscardedMenuItems(serviceProvider, body), role => role == Roles.Chef.ToString())},
+                { "HandleDiscardedMenuItem", (body => HandleDiscardedMenuItem(serviceProvider, body), role => role == Roles.Chef.ToString())},
+                { "GetDiscardedMenuItemsForCurrentMonth", (body => GetDiscardedMenuItemsForCurrentMonth(serviceProvider, body), role => role == Roles.Chef.ToString() || role == Roles.User.ToString() || role == Roles.Admin.ToString())},
+                { "GiveFeedBackOnDiscardedMenuItem", (body => GiveFeedBackOnDiscardedMenuItem(serviceProvider, body), role => role == Roles.Chef.ToString() || role == Roles.User.ToString() || role == Roles.Admin.ToString())}
             };
         }
     }

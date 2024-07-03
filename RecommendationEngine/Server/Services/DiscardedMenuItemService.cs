@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Logging;
 using RecommendationEngine.Common.Exceptions;
 using RecommendationEngine.Data.Entities;
@@ -32,9 +33,25 @@ namespace Server.Services
         public async Task<List<DiscardedMenuItem>> GetDiscardedMenuItemsForCurrentMonth()
         {
             Expression<Func<DiscardedMenuItem, bool>> predicate = m => m.CreatedDatetime.Month == DateTime.UtcNow.Month;
-            var discardedMenuItems = await GetList<DiscardedMenuItem>(predicate: predicate);
+            var discardedMenuItems = await GetList<DiscardedMenuItem>(include : $"{nameof(DiscardedMenuItem.MenuItem)}",predicate: predicate);
 
             return discardedMenuItems;
+        }
+
+        public async Task HandleDiscardedMenuItem(int discardedMenuItemId, bool makeAvailable)
+        {
+            var discardedMenuItem = await GetById<DiscardedMenuItem>(discardedMenuItemId) ?? throw new AppException("Discarded menu item not found.");
+            var menuItem = await _menuItemService.GetById<MenuItem>(discardedMenuItem.MenuItemId) ?? throw new AppException("Menu item not found.");
+            if (makeAvailable)
+            {
+                menuItem.IsAvailable = true;
+            }
+            else
+            {
+                menuItem.IsDeleted = true;
+            }
+
+            await _menuItemService.Update(menuItem.MenuItemId, menuItem);
         }
 
         public async Task GenerateDiscardedMenuItemsForThisMonth()
@@ -47,13 +64,15 @@ namespace Server.Services
             }
 
             var lowRatedMenuItems = await GetLowRatedMenuItems();
-            if(lowRatedMenuItems == null || lowRatedMenuItems.Count == 0)
+            if (lowRatedMenuItems == null || lowRatedMenuItems.Count == 0)
             {
                 throw new AppException("No menu item to discard");
             }
 
             if (lowRatedMenuItems.Count > 0)
             {
+                await MarkLowRatedMenuItemsAsUnAvailable(lowRatedMenuItems);
+
                 var discardedMenuItems = lowRatedMenuItems.Select(menuItem => new DiscardedMenuItem
                 {
                     MenuItemId = menuItem.MenuItemId,
@@ -70,7 +89,7 @@ namespace Server.Services
 
         private async Task<List<MenuItem>> GetLowRatedMenuItems()
         {
-            Expression<Func<MenuItem, bool>> predicate = m => m.AverageRating < 2 && m.UserLikeability < 3;
+            Expression<Func<MenuItem, bool>> predicate = m => m.IsDeleted == false && m.IsAvailable == true && m.AverageRating < 2 && m.UserLikeability < 3;
             var lowRatedMenuItems = await _menuItemService.GetList<MenuItem>(predicate: predicate);
 
             return lowRatedMenuItems;
@@ -83,6 +102,15 @@ namespace Server.Services
             var lastDiscardedItem = (await GetList<DiscardedMenuItem>(sort: sort)).FirstOrDefault();
 
             return lastDiscardedItem;
+        }
+
+        private async Task MarkLowRatedMenuItemsAsUnAvailable(List<MenuItem> lowRatedMenuItems)
+        {
+            foreach (var menuItem in lowRatedMenuItems)
+            {
+                menuItem.IsAvailable = false;
+            }
+            await _menuItemService.UpdateRange(lowRatedMenuItems);
         }
     }
 }

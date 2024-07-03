@@ -10,5 +10,9 @@ namespace Server.Interface
     public interface IDiscardedMenuItemService : ICrudBaseService<DiscardedMenuItem>
     {
         Task GenerateDiscardedMenuItemsForThisMonth();
+
+        Task<List<DiscardedMenuItem>> GetDiscardedMenuItemsForCurrentMonth();
+
+        Task HandleDiscardedMenuItem(int discardedMenuItemId, bool makeAvailable);
     }
 }
