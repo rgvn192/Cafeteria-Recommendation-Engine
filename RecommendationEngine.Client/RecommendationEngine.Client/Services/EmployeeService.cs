@@ -107,7 +107,8 @@ namespace RecommendationEngine.Client.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, "Error sending request to server");
+                Console.WriteLine($"{ex.Message}");
             }
 
         }
@@ -147,7 +148,8 @@ namespace RecommendationEngine.Client.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, "Error sending request to server");
+                Console.WriteLine($"{ex.Message}");
             }
 
         }
@@ -229,7 +231,8 @@ namespace RecommendationEngine.Client.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, "Error sending request to server");
+                Console.WriteLine($"{ex.Message}");
             }
 
         }
@@ -373,27 +376,34 @@ namespace RecommendationEngine.Client.Services
 
         private async Task ViewMonthlyDiscardedMenuList(NetworkStream stream, string role) // Include the role parameter
         {
-
-            var customRequest = new CustomProtocolRequest
+            try
             {
-                Command = "GetDiscardedMenuItemsForCurrentMonth",
-                Role = role, // Include the role in the request
-                Body = null
-            };
-
-            var response = await SendRequestAsync(stream, customRequest);
-
-            if (response != null && response.Status == "Success")
-            {
-                var discardedMenuItemsResponse = JsonConvert.DeserializeObject<List<DiscardedMenuItemsResponse>>(response.Body);
-                if (discardedMenuItemsResponse != null)
+                var customRequest = new CustomProtocolRequest
                 {
-                    Console.WriteLine($"DailyRolledOutMenuItemId\tName\tAverageRating\n");
-                    foreach (var item in discardedMenuItemsResponse)
+                    Command = "GetDiscardedMenuItemsForCurrentMonth",
+                    Role = role, // Include the role in the request
+                    Body = null
+                };
+
+                var response = await SendRequestAsync(stream, customRequest);
+
+                if (response != null && response.Status == "Success")
+                {
+                    var discardedMenuItemsResponse = JsonConvert.DeserializeObject<List<DiscardedMenuItemsResponse>>(response.Body);
+                    if (discardedMenuItemsResponse != null)
                     {
-                        Console.WriteLine($"\t\t{item.DiscardedMenuItemId}\t\t{item.MenuItem.Name}\t{item.MenuItem.AverageRating}\n");
+                        Console.WriteLine($"DailyRolledOutMenuItemId\tName\tAverageRating\n");
+                        foreach (var item in discardedMenuItemsResponse)
+                        {
+                            Console.WriteLine($"\t\t{item.DiscardedMenuItemId}\t\t{item.MenuItem.Name}\t{item.MenuItem.AverageRating}\n");
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending request to server");
+                Console.WriteLine($"{ex.Message}");
             }
         }
 
