@@ -25,6 +25,7 @@ namespace Server.Extentions
             services.AddScoped<IDiscardedMenuItemFeedbackService, DiscardedMenuItemFeedbackService>();
             services.AddScoped<ISentimentAnalyzer, SentimentAnalyzer>();
             services.AddScoped<IKeywordExtractor, KeywordExtractor>();
+            services.AddScoped<IUserPreferenceService, UserPreferenceService>();
             return services;
         }
     }

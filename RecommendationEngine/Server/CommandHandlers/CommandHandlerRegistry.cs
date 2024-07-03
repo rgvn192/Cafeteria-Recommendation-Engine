@@ -35,6 +35,7 @@ namespace Server.CommandHandlers
                 { "GetRolledOutMenuItemsOfToday", (body => GetRolledOutMenuItemsOfToday(serviceProvider, body), role => role == Roles.User.ToString()) },
                 { "GetRolledOutMenuItemsOfTodayForUser", (body => GetRolledOutMenuItemsOfTodayForUser(serviceProvider, body), role => role == Roles.User.ToString()) },
                 { "VoteForDailyMenuItem", (body => VoteForDailyMenuItem(serviceProvider, body), role => role == Roles.User.ToString()) },
+                { "AddUserPreference", (body => AddUserPreference(serviceProvider, body), role => role == Roles.User.ToString()) },
                 { "ViewFinalizedRolledOutMenuItems", (body => ViewFinalizedRolledOutMenuItems(serviceProvider, body), role => role == Roles.User.ToString()) },
                 { "GiveFeedBackOnMenuItem", (body => GiveFeedBackOnMenuItem(serviceProvider, body), role => role == Roles.User.ToString()) },
                 { "ShortListDailyMenuItem", (body => ShortListDailyMenuItem(serviceProvider, body), role => role == Roles.Chef.ToString()) },

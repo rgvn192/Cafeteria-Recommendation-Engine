@@ -26,169 +26,235 @@ namespace Server.CommandHandlers
 
         public static async Task<CustomProtocolResponse> HandleLogin(IServiceProvider serviceProvider, string body)
         {
-            var loginRequest = JsonConvert.DeserializeObject<LoginRequestModel>(body);
-            var authService = serviceProvider.GetRequiredService<IAuthorisationService>();
-            var user = await authService.AuthenticateUser(loginRequest);
-
-            var loginResponse = new LoginResponseModel
+            try
             {
-                Role = user?.Role.Name.ToString(),
-                UserId = user?.UserId
-            };
+                var loginRequest = JsonConvert.DeserializeObject<LoginRequestModel>(body);
+                var authService = serviceProvider.GetRequiredService<IAuthorisationService>();
+                var user = await authService.AuthenticateUser(loginRequest);
 
-            return new CustomProtocolResponse
+                var loginResponse = new LoginResponseModel
+                {
+                    Role = user?.Role.Name.ToString(),
+                    UserId = user?.UserId
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = user != null ? "Success" : "Failed",
+                    Body = JsonConvert.SerializeObject(loginResponse)
+                };
+            }
+            catch (Exception ex)
             {
-                Status = user != null ? "Success" : "Failed",
-                Body = JsonConvert.SerializeObject(loginResponse)
-            };
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
+                };
+            }
         }
 
         public async static Task<CustomProtocolResponse> HandleAddMenuItem(IServiceProvider serviceProvider, string body)
         {
-            var request = JsonConvert.DeserializeObject<MenuItemModel>(body);
-
-            using (var scope = serviceProvider.CreateScope())
+            try
             {
-                var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+                var request = JsonConvert.DeserializeObject<MenuItemModel>(body);
 
-                await menuItemService.Add(request);
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
 
-                var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                    await menuItemService.Add(request);
 
-                List<int> roles = new()
+                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    List<int> roles = new()
                     {
                         (int)Roles.User,
                         (int)Roles.Chef
                     };
-                await notificationService.IssueNotifications(NotificationTypes.NewMenuItemAdded, $"{request?.Name} has been added to Menu", roles);
+                    await notificationService.IssueNotifications(NotificationTypes.NewMenuItemAdded, $"{request?.Name} has been added to Menu", roles);
+                }
+
+                var response = new AddMenuItemResponseModel
+                {
+                    Status = "Success",
+                    Message = "Menu item added successfully."
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
+                };
             }
-
-            var response = new AddMenuItemResponseModel
+            catch (Exception ex)
             {
-                Status = "Success",
-                Message = "Menu item added successfully."
-            };
-
-            return new CustomProtocolResponse
-            {
-                Status = "Success",
-                Body = JsonConvert.SerializeObject(response)
-            };
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
+                };
+            }
         }
 
         public async static Task<CustomProtocolResponse> HandleUpdateMenuItem(IServiceProvider serviceProvider, string body)
         {
-            var request = JsonConvert.DeserializeObject<UpdateMenuItemRequestModel>(body);
-
-            using (var scope = serviceProvider.CreateScope())
+            try
             {
-                var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+                var request = JsonConvert.DeserializeObject<UpdateMenuItemRequestModel>(body);
 
-                var menuItem = await menuItemService.GetById<MenuItemModel>(request.MenuItemId);
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
 
-                var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                menuItem = mapper.Map(request, menuItem);
+                    var menuItem = await menuItemService.GetById<MenuItemModel>(request.MenuItemId);
 
-                await menuItemService.Update(request.MenuItemId, menuItem);
+                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                    menuItem = mapper.Map(request, menuItem);
+
+                    await menuItemService.Update(request.MenuItemId, menuItem);
+                }
+
+                var response = new UpdateMenuItemResponseModel
+                {
+                    Status = "Success",
+                    Message = "Menu item updated successfully."
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
+                };
             }
-
-            var response = new UpdateMenuItemResponseModel
+            catch (Exception ex)
             {
-                Status = "Success",
-                Message = "Menu item updated successfully."
-            };
-
-            return new CustomProtocolResponse
-            {
-                Status = "Success",
-                Body = JsonConvert.SerializeObject(response)
-            };
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
+                };
+            }
         }
 
         public async static Task<CustomProtocolResponse> HandleDeleteMenuItem(IServiceProvider serviceProvider, string body)
         {
-            var request = JsonConvert.DeserializeObject<int>(body);
-
-            using (var scope = serviceProvider.CreateScope())
+            try
             {
-                var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+                var request = JsonConvert.DeserializeObject<int>(body);
 
-                await menuItemService.Delete(request);
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+
+                    await menuItemService.Delete(request);
+                }
+
+                var response = new DeleteMenuResponseModel
+                {
+                    Status = "Success",
+                    Message = "Menu item deleted successfully."
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
+                };
             }
-
-            var response = new DeleteMenuResponseModel
+            catch (Exception ex)
             {
-                Status = "Success",
-                Message = "Menu item deleted successfully."
-            };
-
-            return new CustomProtocolResponse
-            {
-                Status = "Success",
-                Body = JsonConvert.SerializeObject(response)
-            };
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
+                };
+            }
         }
 
         public async static Task<CustomProtocolResponse> HandleGetMenuItems(IServiceProvider serviceProvider, string body)
         {
-            var request = JsonConvert.DeserializeObject<GetMenuItemsRequestModel>(body);
-
-            List<MenuItemModel> menuItems;
-
-            using (var scope = serviceProvider.CreateScope())
+            try
             {
-                var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+                var request = JsonConvert.DeserializeObject<GetMenuItemsRequestModel>(body);
 
-                menuItems = await menuItemService.GetList<MenuItemModel>(null, null, null, request.Limit, request.Offset);
+                List<MenuItemModel> menuItems;
+
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+
+                    menuItems = await menuItemService.GetList<MenuItemModel>(null, null, null, request.Limit, request.Offset);
+                }
+
+                var response = new GetMenuItemsResponseModel
+                {
+                    MenuItems = menuItems
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
+                };
             }
-
-            var response = new GetMenuItemsResponseModel
+            catch (Exception ex)
             {
-                MenuItems = menuItems
-            };
-
-            return new CustomProtocolResponse
-            {
-                Status = "Success",
-                Body = JsonConvert.SerializeObject(response)
-            };
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
+                };
+            }
         }
 
         public async static Task<CustomProtocolResponse> HandleToggleMenuItemAvailability(IServiceProvider serviceProvider, string body)
         {
-            var request = JsonConvert.DeserializeObject<int>(body);
-
-            using (var scope = serviceProvider.CreateScope())
+            try
             {
-                var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
-                var menuItem = await menuItemService.GetById<MenuItemModel>(request) ?? throw new AppException(ErrorResponse.ErrorEnum.NotFound,
-                    LogExtensions.GetLogMessage(nameof(HandleToggleMenuItemAvailability), null, "No such Menu Item found"));
+                var request = JsonConvert.DeserializeObject<int>(body);
 
-                menuItem.IsAvailable = !menuItem.IsAvailable;
-                await menuItemService.Update(menuItem.MenuItemId, menuItem);
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+                    var menuItem = await menuItemService.GetById<MenuItemModel>(request) ?? throw new AppException(ErrorResponse.ErrorEnum.NotFound,
+                        LogExtensions.GetLogMessage(nameof(HandleToggleMenuItemAvailability), null, "No such Menu Item found"));
 
-                var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                    menuItem.IsAvailable = !menuItem.IsAvailable;
+                    await menuItemService.Update(menuItem.MenuItemId, menuItem);
 
-                List<int> roles = new()
+                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+
+                    List<int> roles = new()
                     {
                         (int)Roles.User,
                         (int)Roles.Chef
                     };
-                string availability = menuItem.IsAvailable ? "is now available" : "is now not available";
-                await notificationService.IssueNotifications(NotificationTypes.MenuItemAvailabilityUpdated, $"{menuItem?.Name} {availability} in the menu item", roles);
+                    string availability = menuItem.IsAvailable ? "is now available" : "is now not available";
+                    await notificationService.IssueNotifications(NotificationTypes.MenuItemAvailabilityUpdated, $"{menuItem?.Name} {availability} in the menu item", roles);
+                }
+
+                var response = new CommonServerResponse
+                {
+                    Status = "Success",
+                    Message = "Menu item availability updated successfully."
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
+                };
             }
-
-            var response = new CommonServerResponse
+            catch (Exception ex)
             {
-                Status = "Success",
-                Message = "Menu item availability updated successfully."
-            };
-
-            return new CustomProtocolResponse
-            {
-                Status = "Success",
-                Body = JsonConvert.SerializeObject(response)
-            };
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
+                };
+            }
         }
 
         public async static Task<CustomProtocolResponse> RollOutMenuForNextDayForVoting(IServiceProvider serviceProvider, string body)
@@ -232,8 +298,8 @@ namespace Server.CommandHandlers
             {
                 return new CustomProtocolResponse
                 {
-                    Status = "Failed",
-                    Body = JsonConvert.SerializeObject(ex)
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
                 };
             }
         }
@@ -267,7 +333,7 @@ namespace Server.CommandHandlers
                 return new CustomProtocolResponse
                 {
                     Status = "Failure",
-                    Body = JsonConvert.SerializeObject(ex)
+                    Body = JsonConvert.SerializeObject(ex.Message)
                 };
             }
         }
@@ -352,7 +418,7 @@ namespace Server.CommandHandlers
                 return new CustomProtocolResponse
                 {
                     Status = "Failure",
-                    Body = JsonConvert.SerializeObject(ex)
+                    Body = JsonConvert.SerializeObject(ex.Message)
                 };
             }
         }
@@ -386,7 +452,7 @@ namespace Server.CommandHandlers
                 return new CustomProtocolResponse
                 {
                     Status = "Failure",
-                    Body = JsonConvert.SerializeObject(ex)
+                    Body = JsonConvert.SerializeObject(ex.Message)
                 };
             }
         }
@@ -422,7 +488,7 @@ namespace Server.CommandHandlers
                 return new CustomProtocolResponse
                 {
                     Status = "Failure",
-                    Body = JsonConvert.SerializeObject(ex)
+                    Body = JsonConvert.SerializeObject(ex.Message)
                 };
             }
         }
@@ -508,7 +574,7 @@ namespace Server.CommandHandlers
                 return new CustomProtocolResponse
                 {
                     Status = "Failure",
-                    Body = JsonConvert.SerializeObject(ex)
+                    Body = JsonConvert.SerializeObject(ex.Message)
                 };
             }
         }
@@ -543,7 +609,7 @@ namespace Server.CommandHandlers
                 return new CustomProtocolResponse
                 {
                     Status = "Failure",
-                    Body = JsonConvert.SerializeObject(ex)
+                    Body = JsonConvert.SerializeObject(ex.Message)
                 };
             }
         }
@@ -572,7 +638,7 @@ namespace Server.CommandHandlers
                 return new CustomProtocolResponse
                 {
                     Status = "Failure",
-                    Body = JsonConvert.SerializeObject(ex)
+                    Body = JsonConvert.SerializeObject(ex.Message)
                 };
             }
         }
@@ -611,7 +677,7 @@ namespace Server.CommandHandlers
                 return new CustomProtocolResponse
                 {
                     Status = "Failure",
-                    Body = JsonConvert.SerializeObject(ex)
+                    Body = JsonConvert.SerializeObject(ex.Message)
                 };
             }
         }
@@ -710,7 +776,7 @@ namespace Server.CommandHandlers
                 return new CustomProtocolResponse
                 {
                     Status = "Failure",
-                    Body = JsonConvert.SerializeObject(ex)
+                    Body = JsonConvert.SerializeObject(ex.Message)
                 };
             }
         }
@@ -732,6 +798,41 @@ namespace Server.CommandHandlers
                 {
                     Status = "Success",
                     Message = "Successfully Submitted Feedback."
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
+                };
+            }
+        }
+
+        public async static Task<CustomProtocolResponse> AddUserPreference(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+                var request = JsonConvert.DeserializeObject<UserPreferenceModel>(body);
+
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var userPreferenceService = scope.ServiceProvider.GetRequiredService<IUserPreferenceService>();
+
+                    await userPreferenceService.Add(request);
+                }
+
+                var response = new CommonServerResponse
+                {
+                    Status = "Success",
+                    Message = "Successfully Added User Preference."
                 };
 
                 return new CustomProtocolResponse

@@ -14,14 +14,18 @@ namespace Server.Services
         {
             { "delicious", 5 }, { "tasty", 4 }, { "yummy", 3 }, { "flavorful", 4 }, { "fresh", 3 },
             { "excellent", 5 }, { "amazing", 5 }, { "great", 4 }, { "fantastic", 5 }, { "satisfying", 4 },
-            { "wonderful", 5 }, { "perfect", 5 }, { "savory", 3 }, { "delectable", 4 }, { "appetizing", 3 }
+            { "wonderful", 5 }, { "perfect", 5 }, { "savory", 3 }, { "delectable", 4 }, { "appetizing", 3 },
+            { "divine", 5 }, { "mouthwatering", 4 }, { "scrumptious", 4 }, { "heavenly", 5 }, { "fabulous", 4 },
+            { "refreshing", 3 }, { "lip-smacking", 4 }, { "joyful", 4 }, { "terrific", 4 }, { "superb", 5 }
         };
 
         private static readonly Dictionary<string, int> NegativeWords = new Dictionary<string, int>
         {
             { "bland", -3 }, { "stale", -3 }, { "bad", -4 }, { "awful", -5 }, { "terrible", -5 }, { "horrible", -5 },
             { "disgusting", -5 }, { "unsatisfying", -4 }, { "poor", -3 }, { "unappetizing", -4 }, { "overcooked", -3 },
-            { "undercooked", -3 }, { "salty", -2 }, { "greasy", -2 }, { "mediocre", -2 }
+            { "undercooked", -3 }, { "salty", -2 }, { "greasy", -2 }, { "mediocre", -2 },
+            { "bitter", -3 }, { "sour", -3 }, { "foul", -4 }, { "repulsive", -5 }, { "inedible", -5 },
+            { "repugnant", -5 }, { "disappointing", -3 }, { "subpar", -3 }, { "lackluster", -3 }, { "unsavory", -3 }
         };
 
         private static readonly List<string> NegationWords = new List<string> { "not", "never", "no" };
