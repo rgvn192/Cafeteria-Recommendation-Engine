@@ -23,6 +23,8 @@ namespace Server.Extentions
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IDiscardedMenuItemService, DiscardedMenuItemService>();
             services.AddScoped<IDiscardedMenuItemFeedbackService, DiscardedMenuItemFeedbackService>();
+            services.AddScoped<ISentimentAnalyzer, SentimentAnalyzer>();
+            services.AddScoped<IKeywordExtractor, KeywordExtractor>();
             return services;
         }
     }
