@@ -32,6 +32,7 @@ namespace RecommendationEngine.Client.Services
                 Console.WriteLine("5. Give Feedback for Menu Item");
                 Console.WriteLine("6. View Monthly Discarded Menu List");
                 Console.WriteLine("7. Give FeedBack For Discarded Menu Item");
+                Console.WriteLine("8. Show my Food Preferences");
 
                 Console.WriteLine("x. Logout");
                 Console.Write("Select an option: ");
@@ -60,6 +61,9 @@ namespace RecommendationEngine.Client.Services
                     case "7":
                         await GiveFeedBackForDiscardedMenuItem(stream, role, userId);
                         break;
+                    case "8":
+                        await GetUserPreferences(stream, role, userId);
+                        break;
 
                     case "x":
                         Environment.Exit(0);
@@ -68,6 +72,191 @@ namespace RecommendationEngine.Client.Services
                         Console.WriteLine("Invalid option. Please try again.");
                         break;
                 }
+            }
+        }
+
+        private async Task GetUserPreferences(NetworkStream stream, string role, int? userId)
+        {
+            try
+            {
+                if (userId == null)
+                {
+                    throw new ArgumentNullException(nameof(userId));
+                }
+
+                var userPreferences = await FetchUserPreferences(stream, role, userId.Value);
+                DisplayUserPreferences(userPreferences);
+                await HandleUserPreferenceModification(stream, role, userId.Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending request to server");
+                Console.WriteLine($"{ex.Message}");
+            }
+        }
+
+        private async Task<List<UserPreferenceModel>> FetchUserPreferences(NetworkStream stream, string role, int userId)
+        {
+            var customRequest = new CustomProtocolRequest
+            {
+                Command = "GetUserPreferences",
+                Role = role,
+                Body = JsonConvert.SerializeObject(userId)
+            };
+
+            var response = await SendRequestAsync(stream, customRequest);
+
+            if (response != null && response.Status == "Success")
+            {
+                return JsonConvert.DeserializeObject<List<UserPreferenceModel>>(response.Body);
+            }
+
+            return new List<UserPreferenceModel>();
+        }
+
+        private void DisplayUserPreferences(List<UserPreferenceModel> userPreferences)
+        {
+            if (userPreferences != null && userPreferences.Count != 0)
+            {
+                Console.WriteLine($"CharacteristicId\t\tCharacteristic\n");
+                foreach (var userPreference in userPreferences)
+                {
+                    Console.WriteLine($"{userPreference.UserPreferenceId}\t{userPreference.Characteristic?.Name}\n");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No Food Preferences");
+            }
+        }
+
+        private async Task HandleUserPreferenceModification(NetworkStream stream, string role, int userId)
+        {
+            while (true)
+            {
+                Console.WriteLine("Do you want to:");
+                Console.WriteLine("1. Add preferences");
+                Console.WriteLine("2. Remove preferences");
+                Console.WriteLine("x. Return to main menu");
+                Console.Write("Select an option: ");
+                string choice = Console.ReadLine()?.ToLower();
+
+                switch (choice)
+                {
+                    case "1":
+                        await AddUserPreference(stream, role, userId);
+                        break;
+                    case "2":
+                        await RemoveUserPreference(stream, role, userId);
+                        break;
+                    case "x":
+                        return; // Exit the function to return to the main menu
+                    default:
+                        Console.WriteLine("Invalid choice. Please try again.");
+                        break;
+                }
+            }
+        }
+
+        private async Task AddUserPreference(NetworkStream stream, string role, int userId)
+        {
+            var allCharacteristics = await FetchAllCharacteristics(stream, role);
+            DisplayAllCharacteristics(allCharacteristics);
+
+            Console.WriteLine("Enter the CharacteristicId you want to add:");
+            if (int.TryParse(Console.ReadLine(), out int characteristicId))
+            {
+
+                var userpreferenceModel = new UserPreferenceModel()
+                {
+                    UserId = userId,
+                    CharacteristicId = characteristicId
+                };
+
+                var addPreferenceRequest = new CustomProtocolRequest
+                {
+                    Command = "AddUserPreference",
+                    Role = role,
+                    Body = JsonConvert.SerializeObject(userpreferenceModel)
+                };
+
+                var addResponse = await SendRequestAsync(stream, addPreferenceRequest);
+
+                if (addResponse != null && addResponse.Status == "Success")
+                {
+                    Console.WriteLine("Preference added successfully.");
+                }
+                else
+                {
+                    Console.WriteLine("Failed to add preference.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid CharacteristicId.");
+            }
+        }
+
+        private async Task<List<Characteristic>> FetchAllCharacteristics(NetworkStream stream, string role)
+        {
+            var allCharacteristicsRequest = new CustomProtocolRequest
+            {
+                Command = "GetCharacteristics",
+                Role = role,
+            };
+
+            var response = await SendRequestAsync(stream, allCharacteristicsRequest);
+
+            if (response != null && response.Status == "Success")
+            {
+                return JsonConvert.DeserializeObject<List<Characteristic>>(response.Body);
+            }
+
+            return new List<Characteristic>();
+        }
+
+        private void DisplayAllCharacteristics(List<Characteristic> allCharacteristics)
+        {
+            Console.WriteLine($"CharacteristicId\t\tCharacteristic\n");
+            foreach (var characteristic in allCharacteristics)
+            {
+                Console.WriteLine($"{characteristic.CharacteristicId}\t{characteristic.Name}\n");
+            }
+        }
+
+        private async Task RemoveUserPreference(NetworkStream stream, string role, int userId)
+        {
+            Console.WriteLine("Enter the UserPreferenceId you want to remove:");
+            if (int.TryParse(Console.ReadLine(), out int userPreferenceId))
+            {
+
+                var removePreferenceRequest = new RemoveUserPreferenceRequest()
+                {
+                    UserId = userId,
+                    UserPreferenceId = userPreferenceId
+                };
+
+                var request = new CustomProtocolRequest
+                {
+                    Command = "DeleteUserPreference",
+                    Role = role,
+                    Body = JsonConvert.SerializeObject(removePreferenceRequest)
+                };
+
+                var removeResponse = await SendRequestAsync(stream, request);
+
+                if (removeResponse != null && removeResponse.Status == "Success")
+                {
+                    Console.WriteLine("Preference removed successfully.");
+                }
+                else
+                {
+                    Console.WriteLine("Failed to remove preference.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid UserPreferenceId.");
             }
         }
 

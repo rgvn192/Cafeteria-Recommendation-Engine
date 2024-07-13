@@ -64,18 +64,36 @@ namespace RecommendationEngine.Client
 
         private async Task ConnectToServerAsync()
         {
-            try
+            int maxRetries = 5;
+            int delay = 2000; 
+
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
-                await _tcpClient.ConnectAsync(_serverIP, _port);
-                _logger.LogInformation("Connected to server...");
-                _stream = _tcpClient.GetStream();
-            }
-            catch (SocketException ex)
-            {
-                _logger.LogError(ex, "Failed to connect to server");
-                throw;
+                try
+                {
+                    await _tcpClient.ConnectAsync(_serverIP, _port);
+                    _logger.LogInformation("Connected to server...");
+                    _stream = _tcpClient.GetStream();
+                    return;
+                }
+                catch (SocketException ex)
+                {
+                    _logger.LogError(ex, $"Attempt {attempt} - Failed to connect to server");
+                    if (attempt < maxRetries)
+                    {
+                        Console.WriteLine($"Attempt {attempt} - Unable to connect to the server. Retrying in {delay / 1000} seconds...");
+                        await Task.Delay(delay);
+                        delay *= 2; 
+                    }
+                    else
+                    {
+                        Console.WriteLine("Failed to connect to the server after multiple attempts. Please try again later.");
+                        Environment.Exit(0);
+                    }
+                }
             }
         }
+
 
         private async Task DisplayMenuAsync()
         {
