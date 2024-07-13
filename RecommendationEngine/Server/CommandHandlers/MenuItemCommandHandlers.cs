@@ -184,7 +184,7 @@ namespace Server.CommandHandlers
                 {
                     var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
                     var menuItem = await menuItemService.GetById<MenuItemModel>(request) ?? throw new AppException(ErrorResponse.ErrorEnum.NotFound,
-                        LogExtensions.GetLogMessage(nameof(HandleToggleMenuItemAvailability), null, "No such Menu Item found"));
+                        LogExtensions.GetLogMessage(nameof(ToggleMenuItemAvailability), null, "No such Menu Item found"));
 
                     menuItem.IsAvailable = !menuItem.IsAvailable;
                     await menuItemService.Update(menuItem.MenuItemId, menuItem);
