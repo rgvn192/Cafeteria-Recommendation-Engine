@@ -23,7 +23,7 @@ var host = Host.CreateDefaultBuilder(args)
     {
         // Register IConfiguration
         var configuration = context.Configuration;
-        services.AddSingleton<IConfiguration>(configuration);
+        services.AddSingleton(configuration);
 
         // Configure DbContext
         services.AddDbContext<AppDbContext>(options =>
@@ -42,23 +42,4 @@ var host = Host.CreateDefaultBuilder(args)
 
 await host.RunAsync();
 
-//await CheckRepo(host.Services);
-async Task CheckRepo(IServiceProvider services)
-{
-    using (var scope = services.CreateScope())
-    {
-        var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
 
-        var menuitem = new MenuItemModel()
-        {
-            MenuItemId = 18,
-            Name = "Malai Kofta",
-            Price = 130.00m,
-            MenuItemCategoryId = 2,
-            IsAvailable = true,
-        };
-        await menuItemService.Update<MenuItemModel>(menuitem.MenuItemId, menuitem);
-
-        Console.WriteLine($"Received and stored notification for user");
-    }
-}

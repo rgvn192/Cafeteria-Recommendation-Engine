@@ -221,6 +221,30 @@ namespace RecommendationEngine.Data.Repositories
             return await _dbContext.SaveChangesAsync();
         }
 
+        public virtual async Task<T> GetByIdAsNoTracking(int entityId, string include = null)
+        {
+            if (entityId <= 0)
+            {
+                Dictionary<string, string> paramDict = new Dictionary<string, string>()
+                {
+                    { nameof(entityId), entityId.ToString() },
+                };
+                throw new AppException(ErrorResponse.ErrorEnum.Validation,
+                   LogExtensions.GetLogMessage(nameof(GetByIdAsNoTracking), paramDict, nameof(entityId).GetInvalidIntLog()), null, _logger);
+            }
+
+            IQueryable<T> query = _dbContext.Set<T>().AsNoTracking();
+
+            query = query.AddInclude(include);
+
+            var entity = (T)Activator.CreateInstance(typeof(T));
+            query = query.Filter<T>($"{GetPrimaryIdPropertyInfo(entity).Name} eq {entityId}");
+
+            var result = await query.FirstOrDefaultAsync();
+            return result;
+        }
+
+
         #endregion Public Method
 
         #region Private Methods

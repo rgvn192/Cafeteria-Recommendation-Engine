@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using RecommendationEngine.Data.Configuration;
 using RecommendationEngine.Data.Entities;
 using System;
@@ -14,6 +15,7 @@ namespace RecommendationEngine.Data.Configurations
         public override void Configure(EntityTypeBuilder<UserPreference> builder)
         {
             base.Configure(builder);
+            builder.HasIndex(up => new { up.UserId, up.CharacteristicId }).IsUnique();
         }
     }
 }

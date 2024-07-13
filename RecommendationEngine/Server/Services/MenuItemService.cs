@@ -51,7 +51,7 @@ namespace Server.Services
 
         private async Task<List<DailyRolledOutMenuItem>> GetYesterdayRolledOutMenuItems()
         {
-            DateTime yesterday = DateTime.Now.AddDays(-1).Date;
+            DateTime yesterday = DateTime.UtcNow.AddDays(-1).Date;
 
             Expression<Func<DailyRolledOutMenuItem, bool>> predicate = d => d.IsShortListed == true && d.CreatedDatetime.Date == yesterday;
             return await _dailyRolledOutMenuItemService.GetList<DailyRolledOutMenuItem>(predicate: predicate);

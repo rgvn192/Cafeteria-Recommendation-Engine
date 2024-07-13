@@ -82,13 +82,11 @@ namespace Server
         {
             if (_commandHandlerRegistry.CommandHandlers.TryGetValue(request.Command, out var handler))
             {
-                // Check authorization
                 if (!handler.Authorize(request.Role))
                 {
                     return new CustomProtocolResponse { Status = "Error", Body = "Access denied" };
                 }
 
-                // Handle the command
                 return await handler.Handler(request.Body);
             }
             else

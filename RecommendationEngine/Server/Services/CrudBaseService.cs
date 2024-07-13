@@ -200,6 +200,23 @@ namespace Server.Services
             return await _crudBaseRepository.UpdateRange(entities);
         }
 
+        public virtual async Task<TModel> GetByIdAsNoTracking<TModel>(int id, string include = null)
+        {
+            if (id <= 0)
+            {
+                Dictionary<string, string> paramDict = new Dictionary<string, string>()
+                {
+                    { nameof(id), id.ToString() },
+                };
+
+                throw new AppException(ErrorResponse.ErrorEnum.Validation,
+                    LogExtensions.GetLogMessage(nameof(GetByIdAsNoTracking), paramDict, nameof(id).GetInvalidIntLog()), null, _logger);
+            }
+
+            var entity = await _crudBaseRepository.GetByIdAsNoTracking(id, include);
+            return _mapper.Map<T, TModel>(entity);
+        }
+
         #endregion Methods
 
         #region Protected Methods

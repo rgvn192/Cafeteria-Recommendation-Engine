@@ -23,6 +23,7 @@ namespace RecommendationEngine.Data.Extentions
             services.AddScoped<IDiscardedMenuItemRepository, DiscardedMenuItemRepository>();
             services.AddScoped<IDiscardedMenuItemFeedbackRepository, DiscardedMenuItemFeedbackRepository>();
             services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
+            services.AddScoped<ICharacteristicRepository, CharacteristicRepository>();
             return services;
         }
     }

@@ -850,6 +850,104 @@ namespace Server.CommandHandlers
                 };
             }
         }
+
+        public async static Task<CustomProtocolResponse> DeleteUserPreference(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+                var request = JsonConvert.DeserializeObject<RemoveUserPreferenceRequest>(body);
+
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var userPreferenceService = scope.ServiceProvider.GetRequiredService<IUserPreferenceService>();
+
+                    await userPreferenceService.RemoveUserPreference(request);
+                }
+
+                var response = new DeleteMenuResponseModel
+                {
+                    Status = "Success",
+                    Message = "User Preference deleted successfully."
+                };
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonConvert.SerializeObject(response)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
+                };
+            }
+        }
+
+        public async static Task<CustomProtocolResponse> GetUserPreferences(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+                var userId = JsonConvert.DeserializeObject<int>(body);
+                List<UserPreferenceModel> userPreferences = new();
+
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                    var userPreferenceService = scope.ServiceProvider.GetRequiredService<IUserPreferenceService>();
+
+                    var preferences = await userPreferenceService.GetPreferencesByUserId(userId);
+
+                    userPreferences = preferences;
+                }
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonHelper.SerializeObjectIgnoringCycles(userPreferences)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
+                };
+            }
+        }
+
+        public async static Task<CustomProtocolResponse> GetCharacteristics(IServiceProvider serviceProvider, string body)
+        {
+            try
+            {
+                List<CharacteristicModel> characteristics = new();
+
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                    var characteristicService = scope.ServiceProvider.GetRequiredService<ICharacteristicService>();
+
+                    characteristics = await characteristicService.GetList<CharacteristicModel>();
+                }
+
+                return new CustomProtocolResponse
+                {
+                    Status = "Success",
+                    Body = JsonHelper.SerializeObjectIgnoringCycles(characteristics)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new CustomProtocolResponse
+                {
+                    Status = "Failure",
+                    Body = JsonConvert.SerializeObject(ex.Message)
+                };
+            }
+        }
     }
 
 }

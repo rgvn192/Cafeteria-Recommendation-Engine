@@ -10,10 +10,10 @@ namespace Server.Services
 {
     public class KeywordExtractor : IKeywordExtractor
     {
-        private static readonly HashSet<string> StopWords = new HashSet<string>
-    {
+        private static readonly HashSet<string> StopWords = new()
+        {
         "the", "is", "at", "which", "on", "and", "a", "an", "to", "for", "in", "of", "with", "that", "by", "this", "it", "from", "as", "are", "was", "were"
-    };
+        };
 
         public List<string> ExtractKeywords(string comment)
         {

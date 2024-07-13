@@ -32,5 +32,7 @@ namespace RecommendationEngine.Data.Interface
         void ClearRelatedEntities(T entity);
 
         void ClearRelatedEntities(List<T> entities);
+
+        Task<T> GetByIdAsNoTracking(int entityId, string include = null);
     }
 }
