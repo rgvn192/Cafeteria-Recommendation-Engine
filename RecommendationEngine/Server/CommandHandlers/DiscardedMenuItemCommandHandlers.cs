@@ -17,18 +17,25 @@ using RecommendationEngine.Data.Entities;
 
 namespace Server.CommandHandlers
 {
-    public static class DiscardedMenuItemCommandHandlers
+    public class DiscardedMenuItemCommandHandlers
     {
-        public async static Task<CustomProtocolResponse> GenerateDiscardedMenuItems(IServiceProvider serviceProvider, string body)
+        private readonly IDiscardedMenuItemService _discardedMenuItemService;
+        private readonly IDiscardedMenuItemFeedbackService _discardedMenuItemFeedbackService;
+        private readonly IMapper _mapper;
+
+        public DiscardedMenuItemCommandHandlers(IDiscardedMenuItemService discardedMenuItemService, IDiscardedMenuItemFeedbackService discardedMenuItemFeedbackService, IMapper mapper)
+        {
+            _discardedMenuItemFeedbackService = discardedMenuItemFeedbackService;
+            _discardedMenuItemService = discardedMenuItemService;
+            _mapper = mapper;
+
+        }
+
+        public async Task<CustomProtocolResponse> GenerateDiscardedMenuItems(string body)
         {
             try
             {
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var discardedMenuItemService = scope.ServiceProvider.GetRequiredService<IDiscardedMenuItemService>();
-
-                    await discardedMenuItemService.GenerateDiscardedMenuItemsForThisMonth();
-                }
+                await _discardedMenuItemService.GenerateDiscardedMenuItemsForThisMonth();
 
                 var response = new CommonServerResponse
                 {
@@ -52,21 +59,15 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> GetDiscardedMenuItemsForCurrentMonth(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> GetDiscardedMenuItemsForCurrentMonth(string body)
         {
             try
             {
                 List<DiscardedMenuItemsResponse> discardedMenuItemsResponse = new();
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    var discardedMenuItemService = scope.ServiceProvider.GetRequiredService<IDiscardedMenuItemService>();
+                var discardedMenuItems = await _discardedMenuItemService.GetDiscardedMenuItemsForCurrentMonth();
 
-                    var discardedMenuItems = await discardedMenuItemService.GetDiscardedMenuItemsForCurrentMonth();
-
-                    discardedMenuItemsResponse = mapper.Map<List<DiscardedMenuItem>, List<DiscardedMenuItemsResponse>>(discardedMenuItems);
-                }
+                discardedMenuItemsResponse = _mapper.Map<List<DiscardedMenuItem>, List<DiscardedMenuItemsResponse>>(discardedMenuItems);
 
                 return new CustomProtocolResponse
                 {
@@ -84,17 +85,13 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> HandleDiscardedMenuItem(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> HandleDiscardedMenuItem(string body)
         {
             try
             {
                 var request = JsonConvert.DeserializeObject<HandleDiscardedMenuItemRequest>(body) ?? throw new AppException("request body is null");
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var discardedMenuItemService = scope.ServiceProvider.GetRequiredService<IDiscardedMenuItemService>();
 
-                    await discardedMenuItemService.HandleDiscardedMenuItem(request.DiscardedMenuItemId, request.MakeAvailable);
-                }
+                await _discardedMenuItemService.HandleDiscardedMenuItem(request.DiscardedMenuItemId, request.MakeAvailable);
 
                 var response = new CommonServerResponse
                 {
@@ -118,19 +115,14 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> GiveFeedBackOnDiscardedMenuItem(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> GiveFeedBackOnDiscardedMenuItem(string body)
         {
             try
             {
                 var request = JsonConvert.DeserializeObject<DiscardedMenuItemFeedbackModel>(body);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var feedbackService = scope.ServiceProvider.GetRequiredService<IDiscardedMenuItemFeedbackService>();
-
-                    await feedbackService.Add(request);
-                }
-
+                await _discardedMenuItemFeedbackService.Add(request);
+                
                 var response = new CommonServerResponse
                 {
                     Status = "Success",

@@ -15,20 +15,22 @@ using System.Threading.Tasks;
 
 namespace Server.CommandHandlers
 {
-    public static class UserPreferenceCommandHandlers
+    public class UserPreferenceCommandHandlers
     {
-        public async static Task<CustomProtocolResponse> AddUserPreference(IServiceProvider serviceProvider, string body)
+        private readonly IUserPreferenceService _userPreferenceService;
+
+        public UserPreferenceCommandHandlers(IUserPreferenceService userPreferenceService)
+        {
+            _userPreferenceService = userPreferenceService;
+        }
+
+        public async Task<CustomProtocolResponse> AddUserPreference(string body)
         {
             try
             {
                 var request = JsonConvert.DeserializeObject<UserPreferenceModel>(body);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var userPreferenceService = scope.ServiceProvider.GetRequiredService<IUserPreferenceService>();
-
-                    await userPreferenceService.Add(request);
-                }
+                await _userPreferenceService.Add(request);
 
                 var response = new CommonServerResponse
                 {
@@ -52,18 +54,13 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> DeleteUserPreference(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> DeleteUserPreference(string body)
         {
             try
             {
                 var request = JsonConvert.DeserializeObject<RemoveUserPreferenceRequest>(body);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var userPreferenceService = scope.ServiceProvider.GetRequiredService<IUserPreferenceService>();
-
-                    await userPreferenceService.RemoveUserPreference(request);
-                }
+                await _userPreferenceService.RemoveUserPreference(request);
 
                 var response = new DeleteMenuResponseModel
                 {
@@ -87,22 +84,16 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> GetUserPreferences(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> GetUserPreferences(string body)
         {
             try
             {
                 var userId = JsonConvert.DeserializeObject<int>(body);
                 List<UserPreferenceModel> userPreferences = new();
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    var userPreferenceService = scope.ServiceProvider.GetRequiredService<IUserPreferenceService>();
+                var preferences = await _userPreferenceService.GetPreferencesByUserId(userId);
 
-                    var preferences = await userPreferenceService.GetPreferencesByUserId(userId);
-
-                    userPreferences = preferences;
-                }
+                userPreferences = preferences;
 
                 return new CustomProtocolResponse
                 {

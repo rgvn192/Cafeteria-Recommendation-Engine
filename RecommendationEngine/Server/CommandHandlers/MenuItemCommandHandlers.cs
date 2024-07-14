@@ -17,29 +17,33 @@ using System.Threading.Tasks;
 
 namespace Server.CommandHandlers
 {
-    public static class MenuItemCommandHandlers
+    public class MenuItemCommandHandlers
     {
-        public async static Task<CustomProtocolResponse> AddMenuItem(IServiceProvider serviceProvider, string body)
+        private readonly IMenuItemService _menuItemService;
+        private readonly INotificationService _notificationService;
+        private readonly IMapper _mapper;
+
+        public MenuItemCommandHandlers(IMenuItemService menuItemService, INotificationService notificationService, IMapper mapper)
+        {
+            _menuItemService = menuItemService;
+            _notificationService = notificationService;
+            _mapper = mapper;
+        }
+
+        public async Task<CustomProtocolResponse> AddMenuItem(string body)
         {
             try
             {
                 var request = JsonConvert.DeserializeObject<MenuItemModel>(body);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+                await _menuItemService.Add(request);
 
-                    await menuItemService.Add(request);
-
-                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-
-                    List<int> roles = new()
+                List<int> roles = new()
                     {
                         (int)Roles.User,
                         (int)Roles.Chef
                     };
-                    await notificationService.IssueNotifications(NotificationTypes.NewMenuItemAdded, $"{request?.Name} has been added to Menu", roles);
-                }
+                await _notificationService.IssueNotifications(NotificationTypes.NewMenuItemAdded, $"{request?.Name} has been added to Menu", roles);
 
                 var response = new AddMenuItemResponseModel
                 {
@@ -63,23 +67,17 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> UpdateMenuItem(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> UpdateMenuItem(string body)
         {
             try
             {
                 var request = JsonConvert.DeserializeObject<UpdateMenuItemRequestModel>(body);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
+                var menuItem = await _menuItemService.GetById<MenuItemModel>(request.MenuItemId);
 
-                    var menuItem = await menuItemService.GetById<MenuItemModel>(request.MenuItemId);
+                menuItem = _mapper.Map(request, menuItem);
 
-                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    menuItem = mapper.Map(request, menuItem);
-
-                    await menuItemService.Update(request.MenuItemId, menuItem);
-                }
+                await _menuItemService.Update(request.MenuItemId, menuItem);
 
                 var response = new UpdateMenuItemResponseModel
                 {
@@ -103,18 +101,13 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> DeleteMenuItem(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> DeleteMenuItem(string body)
         {
             try
             {
                 var request = JsonConvert.DeserializeObject<int>(body);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
-
-                    await menuItemService.Delete(request);
-                }
+                await _menuItemService.Delete(request);
 
                 var response = new DeleteMenuResponseModel
                 {
@@ -138,7 +131,7 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> GetMenuItems(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> GetMenuItems(string body)
         {
             try
             {
@@ -146,12 +139,7 @@ namespace Server.CommandHandlers
 
                 List<MenuItemModel> menuItems;
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
-
-                    menuItems = await menuItemService.GetList<MenuItemModel>(null, null, null, request.Limit, request.Offset);
-                }
+                menuItems = await _menuItemService.GetList<MenuItemModel>(null, null, null, request.Limit, request.Offset);
 
                 var response = new GetMenuItemsResponseModel
                 {
@@ -174,31 +162,25 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> ToggleMenuItemAvailability(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> ToggleMenuItemAvailability(string body)
         {
             try
             {
                 var request = JsonConvert.DeserializeObject<int>(body);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var menuItemService = scope.ServiceProvider.GetRequiredService<IMenuItemService>();
-                    var menuItem = await menuItemService.GetById<MenuItemModel>(request) ?? throw new AppException(ErrorResponse.ErrorEnum.NotFound,
-                        LogExtensions.GetLogMessage(nameof(ToggleMenuItemAvailability), null, "No such Menu Item found"));
+                var menuItem = await _menuItemService.GetById<MenuItemModel>(request) ?? throw new AppException(ErrorResponse.ErrorEnum.NotFound,
+                    LogExtensions.GetLogMessage(nameof(ToggleMenuItemAvailability), null, "No such Menu Item found"));
 
-                    menuItem.IsAvailable = !menuItem.IsAvailable;
-                    await menuItemService.Update(menuItem.MenuItemId, menuItem);
+                menuItem.IsAvailable = !menuItem.IsAvailable;
+                await _menuItemService.Update(menuItem.MenuItemId, menuItem);
 
-                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-
-                    List<int> roles = new()
+                List<int> roles = new()
                     {
                         (int)Roles.User,
                         (int)Roles.Chef
                     };
-                    string availability = menuItem.IsAvailable ? "is now available" : "is now not available";
-                    await notificationService.IssueNotifications(NotificationTypes.MenuItemAvailabilityUpdated, $"{menuItem?.Name} {availability} in the menu item", roles);
-                }
+                string availability = menuItem.IsAvailable ? "is now available" : "is now not available";
+                await _notificationService.IssueNotifications(NotificationTypes.MenuItemAvailabilityUpdated, $"{menuItem?.Name} {availability} in the menu item", roles);
 
                 var response = new CommonServerResponse
                 {

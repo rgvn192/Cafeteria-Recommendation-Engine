@@ -15,33 +15,21 @@ using System.Threading.Tasks;
 
 namespace Server.CommandHandlers
 {
-    public static class VotingCommandHandlers
+    public class VotingCommandHandlers
     {
-        public async static Task<CustomProtocolResponse> VoteForDailyMenuItem(IServiceProvider serviceProvider, string body)
+        private readonly IDailyRolledOutMenuItemVoteService _dailyRolledOutMenuItemVoteService;
+        public VotingCommandHandlers(IDailyRolledOutMenuItemVoteService dailyRolledOutMenuItemVoteService)
+        {
+            _dailyRolledOutMenuItemVoteService = dailyRolledOutMenuItemVoteService;
+        }
+
+        public async Task<CustomProtocolResponse> VoteForDailyMenuItem(string body)
         {
             try
             {
                 var request = JsonConvert.DeserializeObject<VoteForDailyMenuItemRequest>(body);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var voteService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemVoteService>();
-
-                    Expression<Func<DailyRolledOutMenuItemVote, bool>> predicate = v => v.UserId == request.UserId && v.DailyRolledOutMenuItemId == request.DailyRolledOutMenuItemId;
-                    var duplicateVote = await voteService.GetList<DailyRolledOutMenuItemVote>(predicate: predicate);
-
-                    if (duplicateVote != null && duplicateVote.Count != 0)
-                    {
-                        throw new AppException("Cannot Vote on already voted item");
-                    }
-
-                    var dailyMenuItemVote = new DailyRolledOutMenuItemVote()
-                    {
-                        DailyRolledOutMenuItemId = request.DailyRolledOutMenuItemId,
-                        UserId = request.UserId
-                    };
-                    await voteService.Add(dailyMenuItemVote);
-                }
+                await _dailyRolledOutMenuItemVoteService.VoteForMenuItem(request.DailyRolledOutMenuItemId, request.UserId);
 
                 var response = new CommonServerResponse
                 {

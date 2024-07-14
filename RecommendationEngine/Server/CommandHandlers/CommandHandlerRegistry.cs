@@ -21,33 +21,52 @@ namespace Server.CommandHandlers
 
         public CommandHandlerRegistry(IServiceProvider serviceProvider)
         {
+            var menuItemHandlers = serviceProvider.GetRequiredService<MenuItemCommandHandlers>();
+            var rolledOutMenuItemCommandHandlers = serviceProvider.GetRequiredService<RolledOutMenuItemCommandHandlers>();
+            var recommendationCommandHandlers = serviceProvider.GetRequiredService<RecommendationCommandHandlers>();
+            var userPreferenceCommandHandlers = serviceProvider.GetRequiredService<UserPreferenceCommandHandlers>();
+            var votingCommandHandlers = serviceProvider.GetRequiredService<VotingCommandHandlers>();
+            var characteristicCommandHandlers = serviceProvider.GetRequiredService<CharacteristicCommandHandlers>();
+            var menuItemFeedbackCommandHandlers = serviceProvider.GetRequiredService<MenuItemFeedbackCommandHandlers>();
+            var notificationCommandHandlers = serviceProvider.GetRequiredService<NotificationCommandHandlers>();
+            var discardedMenuItemCommandHandlers = serviceProvider.GetRequiredService<DiscardedMenuItemCommandHandlers>();
+
             CommandHandlers = new Dictionary<string, (CommandHandler, AuthorizationCheck)>
             {
                 { "Login", (body => AuthCommandHandlers.Login(serviceProvider, body), role => true) },
-                { "AddMenuItem", (body => MenuItemCommandHandlers.AddMenuItem(serviceProvider, body), role => role == Roles.Admin.ToString()) },
-                { "UpdateMenuItem", (body => MenuItemCommandHandlers.UpdateMenuItem(serviceProvider, body), role => role == Roles.Admin.ToString()) },
-                { "DeleteMenuItem", (body => MenuItemCommandHandlers.DeleteMenuItem(serviceProvider, body), role => role == Roles.Admin.ToString()) },
-                { "ToggleMenuItemAvailability", (body => MenuItemCommandHandlers.ToggleMenuItemAvailability(serviceProvider, body), role => role == Roles.Admin.ToString()) },
-                { "GetMenuItems", (body => MenuItemCommandHandlers.GetMenuItems(serviceProvider, body), role => role == Roles.Admin.ToString() || role == Roles.Chef.ToString()) },
-                { "RollOutMenuForNextDayForVoting", (body => RolledOutMenuItemCommandHandlers.RollOutMenuForNextDayForVoting(serviceProvider, body), role => role == Roles.Chef.ToString()) },
-                { "GetRecommendation", (body => RecommendationCommandHandlers.GetRecommendation(serviceProvider, body), role => role == Roles.Chef.ToString()) },
-                { "ViewVotesOnRolledOutMenuItems", (body => RolledOutMenuItemCommandHandlers.ViewVotesOnRolledOutMenuItems(serviceProvider, body), role => role == Roles.Chef.ToString()) },
-                { "GetRolledOutMenuItemsOfToday", (body => RolledOutMenuItemCommandHandlers.GetRolledOutMenuItemsOfToday(serviceProvider, body), role => role == Roles.User.ToString()) },
-                { "GetRolledOutMenuItemsOfTodayForUser", (body => RolledOutMenuItemCommandHandlers.GetRolledOutMenuItemsOfTodayForUser(serviceProvider, body), role => role == Roles.User.ToString()) },
-                { "VoteForDailyMenuItem", (body => VotingCommandHandlers.VoteForDailyMenuItem(serviceProvider, body), role => role == Roles.User.ToString()) },
-                { "AddUserPreference", (body => UserPreferenceCommandHandlers.AddUserPreference(serviceProvider, body), role => role == Roles.User.ToString()) },
-                { "DeleteUserPreference", (body => UserPreferenceCommandHandlers.DeleteUserPreference(serviceProvider, body), role => role == Roles.User.ToString()) },
-                { "GetUserPreferences", (body => UserPreferenceCommandHandlers.GetUserPreferences(serviceProvider, body), role => role == Roles.User.ToString()) },
-                { "GetCharacteristics", (body => CharacteristicCommandHandlers.GetCharacteristics(serviceProvider, body), role => role == Roles.User.ToString()) },
-                { "ViewFinalizedRolledOutMenuItems", (body => RolledOutMenuItemCommandHandlers.ViewFinalizedRolledOutMenuItems(serviceProvider, body), role => role == Roles.User.ToString()) },
-                { "GiveFeedBackOnMenuItem", (body => MenuItemFeedbackCommandHandlers.GiveFeedBackOnMenuItem(serviceProvider, body), role => role == Roles.User.ToString()) },
-                { "ShortListDailyMenuItem", (body => RolledOutMenuItemCommandHandlers.ShortListDailyMenuItem(serviceProvider, body), role => role == Roles.Chef.ToString()) },
-                { "GetNotificationsForUser", (body => NotificationCommandHandlers.GetNotificationsForUser(serviceProvider, body), role => role == Roles.Chef.ToString() || role == Roles.User.ToString() || role == Roles.Admin.ToString())},
-                { "IssueNotificationForFinalizedMenu", (body => NotificationCommandHandlers.IssueNotificationForFinalizedMenu(serviceProvider, body), role => role == Roles.Chef.ToString())},
-                { "GenerateDiscardedMenuItems", (body => DiscardedMenuItemCommandHandlers.GenerateDiscardedMenuItems(serviceProvider, body), role => role == Roles.Chef.ToString())},
-                { "HandleDiscardedMenuItem", (body => DiscardedMenuItemCommandHandlers.HandleDiscardedMenuItem(serviceProvider, body), role => role == Roles.Chef.ToString())},
-                { "GetDiscardedMenuItemsForCurrentMonth", (body => DiscardedMenuItemCommandHandlers.GetDiscardedMenuItemsForCurrentMonth(serviceProvider, body), role => role == Roles.Chef.ToString() || role == Roles.User.ToString() || role == Roles.Admin.ToString())},
-                { "GiveFeedBackOnDiscardedMenuItem", (body => DiscardedMenuItemCommandHandlers.GiveFeedBackOnDiscardedMenuItem(serviceProvider, body), role => role == Roles.Chef.ToString() || role == Roles.User.ToString() || role == Roles.Admin.ToString())}
+
+                { "AddMenuItem", (body => menuItemHandlers.AddMenuItem(body), role => role == Roles.Admin.ToString()) },
+                { "UpdateMenuItem", (body => menuItemHandlers.UpdateMenuItem(body), role => role == Roles.Admin.ToString()) },
+                { "DeleteMenuItem", (body => menuItemHandlers.DeleteMenuItem(body), role => role == Roles.Admin.ToString()) },
+                { "ToggleMenuItemAvailability", (body => menuItemHandlers.ToggleMenuItemAvailability(body), role => role == Roles.Admin.ToString()) },
+                { "GetMenuItems", (body => menuItemHandlers.GetMenuItems(body), role => role == Roles.Admin.ToString() || role == Roles.Chef.ToString()) },
+
+                { "RollOutMenuForNextDayForVoting", (body => rolledOutMenuItemCommandHandlers.RollOutMenuForNextDayForVoting(body), role => role == Roles.Chef.ToString()) },
+                { "ViewVotesOnRolledOutMenuItems", (body => rolledOutMenuItemCommandHandlers.ViewVotesOnRolledOutMenuItems(body), role => role == Roles.Chef.ToString()) },
+                { "GetRolledOutMenuItemsOfToday", (body => rolledOutMenuItemCommandHandlers.GetRolledOutMenuItemsOfToday(body), role => role == Roles.User.ToString()) },
+                { "GetRolledOutMenuItemsOfTodayForUser", (body => rolledOutMenuItemCommandHandlers.GetRolledOutMenuItemsOfTodayForUser(body), role => role == Roles.User.ToString()) },
+                { "ViewFinalizedRolledOutMenuItems", (body => rolledOutMenuItemCommandHandlers.ViewFinalizedRolledOutMenuItems(body), role => role == Roles.User.ToString()) },
+                { "ShortListDailyMenuItem", (body => rolledOutMenuItemCommandHandlers.ShortListDailyMenuItem(body), role => role == Roles.Chef.ToString()) },
+
+                { "GetRecommendation", (body => recommendationCommandHandlers.GetRecommendation(body), role => role == Roles.Chef.ToString()) },
+               
+                { "VoteForDailyMenuItem", (body => votingCommandHandlers.VoteForDailyMenuItem(body), role => role == Roles.User.ToString()) },
+
+                { "AddUserPreference", (body => userPreferenceCommandHandlers.AddUserPreference(body), role => role == Roles.User.ToString()) },
+                { "DeleteUserPreference", (body => userPreferenceCommandHandlers.DeleteUserPreference(body), role => role == Roles.User.ToString()) },
+                { "GetUserPreferences", (body => userPreferenceCommandHandlers.GetUserPreferences(body), role => role == Roles.User.ToString()) },
+
+                { "GetCharacteristics", (body => characteristicCommandHandlers.GetCharacteristics(body), role => role == Roles.User.ToString()) },
+                
+                { "GiveFeedBackOnMenuItem", (body => menuItemFeedbackCommandHandlers.GiveFeedBackOnMenuItem(body), role => role == Roles.User.ToString()) },
+                
+                { "GetNotificationsForUser", (body => notificationCommandHandlers.GetNotificationsForUser(body), role => role == Roles.Chef.ToString() || role == Roles.User.ToString() || role == Roles.Admin.ToString())},
+                { "IssueNotificationForFinalizedMenu", (body => notificationCommandHandlers.IssueNotificationForFinalizedMenu(body), role => role == Roles.Chef.ToString())},
+
+                { "GenerateDiscardedMenuItems", (body => discardedMenuItemCommandHandlers.GenerateDiscardedMenuItems(body), role => role == Roles.Chef.ToString())},
+                { "HandleDiscardedMenuItem", (body => discardedMenuItemCommandHandlers.HandleDiscardedMenuItem(body), role => role == Roles.Chef.ToString())},
+                { "GetDiscardedMenuItemsForCurrentMonth", (body => discardedMenuItemCommandHandlers.GetDiscardedMenuItemsForCurrentMonth(body), role => role == Roles.Chef.ToString() || role == Roles.User.ToString() || role == Roles.Admin.ToString())},
+                { "GiveFeedBackOnDiscardedMenuItem", (body => discardedMenuItemCommandHandlers.GiveFeedBackOnDiscardedMenuItem(body), role => role == Roles.Chef.ToString() || role == Roles.User.ToString() || role == Roles.Admin.ToString())}
             };
         }
     }

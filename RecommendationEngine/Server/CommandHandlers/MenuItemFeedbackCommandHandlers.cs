@@ -12,21 +12,23 @@ using System.Threading.Tasks;
 
 namespace Server.CommandHandlers
 {
-    public static class MenuItemFeedbackCommandHandlers
+    public class MenuItemFeedbackCommandHandlers
     {
-        public async static Task<CustomProtocolResponse> GiveFeedBackOnMenuItem(IServiceProvider serviceProvider, string body)
+        private readonly IFeedbackService _feedbackService;
+
+        public MenuItemFeedbackCommandHandlers(IFeedbackService feedbackService)
+        {
+            _feedbackService = feedbackService;
+        }
+
+        public async Task<CustomProtocolResponse> GiveFeedBackOnMenuItem(string body)
         {
             try
             {
                 var request = JsonConvert.DeserializeObject<FeedbackModel>(body);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var feedbackService = scope.ServiceProvider.GetRequiredService<IFeedbackService>();
-
-                    await feedbackService.AddFeedBackForMenuItem(request);
-                }
-
+                await _feedbackService.AddFeedBackForMenuItem(request);
+                
                 var response = new CommonServerResponse
                 {
                     Status = "Success",

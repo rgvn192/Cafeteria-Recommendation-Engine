@@ -13,22 +13,22 @@ using System.Threading.Tasks;
 
 namespace Server.CommandHandlers
 {
-    public static class CharacteristicCommandHandlers
+    public class CharacteristicCommandHandlers
     {
-        public async static Task<CustomProtocolResponse> GetCharacteristics(IServiceProvider serviceProvider, string body)
+        private readonly ICharacteristicService _characteristicService;
+
+        public CharacteristicCommandHandlers(ICharacteristicService characteristicService)
+        {
+            _characteristicService = characteristicService;
+        }
+
+        public async Task<CustomProtocolResponse> GetCharacteristics(string body)
         {
             try
             {
                 List<CharacteristicModel> characteristics = new();
-
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    var characteristicService = scope.ServiceProvider.GetRequiredService<ICharacteristicService>();
-
-                    characteristics = await characteristicService.GetList<CharacteristicModel>();
-                }
-
+                characteristics = await _characteristicService.GetList<CharacteristicModel>();
+                
                 return new CustomProtocolResponse
                 {
                     Status = "Success",

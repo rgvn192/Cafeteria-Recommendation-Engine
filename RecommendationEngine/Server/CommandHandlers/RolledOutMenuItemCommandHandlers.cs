@@ -18,32 +18,34 @@ using System.Threading.Tasks;
 
 namespace Server.CommandHandlers
 {
-    public static class RolledOutMenuItemCommandHandlers
+    public class RolledOutMenuItemCommandHandlers
     {
-        public async static Task<CustomProtocolResponse> RollOutMenuForNextDayForVoting(IServiceProvider serviceProvider, string body)
+        private readonly IDailyRolledOutMenuItemService _dailyRolledOutMenuItemService;
+        private readonly INotificationService _notificationService;
+        private readonly IMapper _mapper;
+
+        public RolledOutMenuItemCommandHandlers(INotificationService notificationService, IDailyRolledOutMenuItemService dailyRolledOutMenuItemService, IMapper mapper)
+        {
+            _dailyRolledOutMenuItemService = dailyRolledOutMenuItemService;
+            _notificationService = notificationService;
+            _mapper = mapper;
+
+        }
+        public async Task<CustomProtocolResponse> RollOutMenuForNextDayForVoting(string body)
         {
             try
             {
                 var request = JsonConvert.DeserializeObject<List<DailyRolledOutMenuItemRequestModel>>(body);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
+                var dailyRolledOuts = _mapper.Map<List<DailyRolledOutMenuItemRequestModel>, List<DailyRolledOutMenuItem>>(request);
+                await _dailyRolledOutMenuItemService.AddRange(dailyRolledOuts);
 
-                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    var dailyRolledOutMenuItemService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemService>();
-
-                    var dailyRolledOuts = mapper.Map<List<DailyRolledOutMenuItemRequestModel>, List<DailyRolledOutMenuItem>>(request);
-                    await dailyRolledOutMenuItemService.AddRange(dailyRolledOuts);
-
-                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-
-                    var tomorrow = DateTime.UtcNow.Date.AddDays(1);
-                    List<int> roles = new List<int>()
+                var tomorrow = DateTime.UtcNow.Date.AddDays(1);
+                List<int> roles = new List<int>()
                     {
                         (int)Roles.User
                     };
-                    await notificationService.IssueNotifications(NotificationTypes.MenuItemVoting, $"The Menu for {tomorrow.ToShortDateString()} has been rolled out for voting.", roles);
-                }
+                await _notificationService.IssueNotifications(NotificationTypes.MenuItemVoting, $"The Menu for {tomorrow.ToShortDateString()} has been rolled out for voting.", roles);
 
                 var response = new CommonServerResponse
                 {
@@ -67,25 +69,18 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> GetRolledOutMenuItemsOfToday(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> GetRolledOutMenuItemsOfToday(string body)
         {
             try
             {
-
                 List<RolledOutMenuItem> menuItems;
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var rolledOutMenuItemService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemService>();
+                var today = DateTime.UtcNow.Date;
+                Expression<Func<DailyRolledOutMenuItem, bool>> predicate = m => m.CreatedDatetime.Date == today;
 
-                    var today = DateTime.UtcNow.Date;
-                    Expression<Func<DailyRolledOutMenuItem, bool>> predicate = m => m.CreatedDatetime.Date == today;
+                var rolledOutMenuItems = await _dailyRolledOutMenuItemService.GetList<DailyRolledOutMenuItem>(include: $"{nameof(DailyRolledOutMenuItem.MenuItem)}", predicate: predicate);
 
-                    var rolledOutMenuItems = await rolledOutMenuItemService.GetList<DailyRolledOutMenuItem>(include: $"{nameof(DailyRolledOutMenuItem.MenuItem)}", predicate: predicate);
-
-                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    menuItems = mapper.Map<List<DailyRolledOutMenuItem>, List<RolledOutMenuItem>>(rolledOutMenuItems);
-                }
+                menuItems = _mapper.Map<List<DailyRolledOutMenuItem>, List<RolledOutMenuItem>>(rolledOutMenuItems);
 
                 return new CustomProtocolResponse
                 {
@@ -103,7 +98,7 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> GetRolledOutMenuItemsOfTodayForUser(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> GetRolledOutMenuItemsOfTodayForUser(string body)
         {
             try
             {
@@ -111,15 +106,9 @@ namespace Server.CommandHandlers
 
                 List<RolledOutMenuItem> menuItems;
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var rolledOutMenuItemService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemService>();
+                var rolledOutMenuItems = await _dailyRolledOutMenuItemService.GetRolledOutMenuItemsForUser(userId);
 
-                    var rolledOutMenuItems = await rolledOutMenuItemService.GetRolledOutMenuItemsForUser(userId);
-
-                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    menuItems = mapper.Map<List<DailyRolledOutMenuItem>, List<RolledOutMenuItem>>(rolledOutMenuItems);
-                }
+                menuItems = _mapper.Map<List<DailyRolledOutMenuItem>, List<RolledOutMenuItem>>(rolledOutMenuItems);
 
                 return new CustomProtocolResponse
                 {
@@ -137,25 +126,19 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> ViewVotesOnRolledOutMenuItems(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> ViewVotesOnRolledOutMenuItems(string body)
         {
             try
             {
 
                 List<ViewVotesOnRolledOutMenuItemsResponse> menuItems;
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var rolledOutMenuItemService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemService>();
+                var today = DateTime.UtcNow.Date;
+                Expression<Func<DailyRolledOutMenuItem, bool>> predicate = m => m.CreatedDatetime.Date == today;
 
-                    var today = DateTime.UtcNow.Date;
-                    Expression<Func<DailyRolledOutMenuItem, bool>> predicate = m => m.CreatedDatetime.Date == today;
+                var rolledOutMenuItems = await _dailyRolledOutMenuItemService.GetList<DailyRolledOutMenuItem>(include: $"{nameof(DailyRolledOutMenuItem.MenuItem)}, {nameof(DailyRolledOutMenuItem.DailyRolledOutMenuItemVotes)}", predicate: predicate);
 
-                    var rolledOutMenuItems = await rolledOutMenuItemService.GetList<DailyRolledOutMenuItem>(include: $"{nameof(DailyRolledOutMenuItem.MenuItem)}, {nameof(DailyRolledOutMenuItem.DailyRolledOutMenuItemVotes)}", predicate: predicate);
-
-                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    menuItems = mapper.Map<List<DailyRolledOutMenuItem>, List<ViewVotesOnRolledOutMenuItemsResponse>>(rolledOutMenuItems);
-                }
+                menuItems = _mapper.Map<List<DailyRolledOutMenuItem>, List<ViewVotesOnRolledOutMenuItemsResponse>>(rolledOutMenuItems);
 
                 return new CustomProtocolResponse
                 {
@@ -173,23 +156,18 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> ShortListDailyMenuItem(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> ShortListDailyMenuItem(string body)
         {
             try
             {
                 var rolledOutMenuItemId = JsonConvert.DeserializeObject<int>(body);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var rolledOutMenuItemService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemService>();
+                Expression<Func<DailyRolledOutMenuItem, bool>> predicate = v => v.DailyRolledOutMenuItemId == rolledOutMenuItemId;
+                var rolledOutMenuItem = await _dailyRolledOutMenuItemService.GetById<DailyRolledOutMenuItemModel>(rolledOutMenuItemId) ?? throw new AppException("No such rolled out item found");
 
-                    Expression<Func<DailyRolledOutMenuItem, bool>> predicate = v => v.DailyRolledOutMenuItemId == rolledOutMenuItemId;
-                    var rolledOutMenuItem = await rolledOutMenuItemService.GetById<DailyRolledOutMenuItemModel>(rolledOutMenuItemId) ?? throw new AppException("No such rolled out item found");
+                rolledOutMenuItem.IsShortListed = true;
 
-                    rolledOutMenuItem.IsShortListed = true;
-
-                    var recommendedMenuItems = await rolledOutMenuItemService.Update(rolledOutMenuItemId, rolledOutMenuItem);
-                }
+                var recommendedMenuItems = await _dailyRolledOutMenuItemService.Update(rolledOutMenuItemId, rolledOutMenuItem);
 
                 var response = new CommonServerResponse
                 {
@@ -213,34 +191,27 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> ViewFinalizedRolledOutMenuItems(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> ViewFinalizedRolledOutMenuItems(string body)
         {
             try
             {
-
                 List<ViewFinalizedRolledOutMenuItemsResponse> finalizedMenuItems = new();
 
-                using (var scope = serviceProvider.CreateScope())
+                var today = DateTime.UtcNow.Date;
+                Expression<Func<DailyRolledOutMenuItem, bool>> predicate = m => m.CreatedDatetime.Date == today && m.IsShortListed == true;
+
+                var rolledOutMenuItems = await _dailyRolledOutMenuItemService.GetList<DailyRolledOutMenuItem>(include: $"{nameof(DailyRolledOutMenuItem.MenuItem)},{nameof(DailyRolledOutMenuItem.MealType)}", predicate: predicate);
+
+                List<MenuItem> menuItems = new();
+                foreach (var menuItem in rolledOutMenuItems)
                 {
-                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-                    var rolledOutMenuItemService = scope.ServiceProvider.GetRequiredService<IDailyRolledOutMenuItemService>();
-
-                    var today = DateTime.UtcNow.Date;
-                    Expression<Func<DailyRolledOutMenuItem, bool>> predicate = m => m.CreatedDatetime.Date == today && m.IsShortListed == true;
-
-                    var rolledOutMenuItems = await rolledOutMenuItemService.GetList<DailyRolledOutMenuItem>(include: $"{nameof(DailyRolledOutMenuItem.MenuItem)},{nameof(DailyRolledOutMenuItem.MealType)}", predicate: predicate);
-
-                    List<MenuItem> menuItems = new();
-                    foreach (var menuItem in rolledOutMenuItems)
+                    var menuItemModel = _mapper.Map<MenuItem, MenuItemModel>(menuItem.MenuItem);
+                    var finalizedMenuItem = new ViewFinalizedRolledOutMenuItemsResponse()
                     {
-                        var menuItemModel = mapper.Map<MenuItem, MenuItemModel>(menuItem.MenuItem);
-                        var finalizedMenuItem = new ViewFinalizedRolledOutMenuItemsResponse()
-                        {
-                            MenuItem = menuItemModel,
-                            Mealtype = menuItem.MealType.Name.ToString(),
-                        };
-                        finalizedMenuItems.Add(finalizedMenuItem);
-                    }
+                        MenuItem = menuItemModel,
+                        Mealtype = menuItem.MealType.Name.ToString(),
+                    };
+                    finalizedMenuItems.Add(finalizedMenuItem);
                 }
 
                 return new CustomProtocolResponse

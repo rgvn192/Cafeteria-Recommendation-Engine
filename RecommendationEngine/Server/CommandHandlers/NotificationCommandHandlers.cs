@@ -14,20 +14,23 @@ using Server.Models.Response;
 
 namespace Server.CommandHandlers
 {
-    public static class NotificationCommandHandlers
+    public class NotificationCommandHandlers
     {
-        public async static Task<CustomProtocolResponse> GetNotificationsForUser(IServiceProvider serviceProvider, string body)
+        private readonly INotificationService _notificationService;
+
+        public NotificationCommandHandlers(INotificationService notificationService)
+        {
+            _notificationService = notificationService;
+        }
+
+        public async Task<CustomProtocolResponse> GetNotificationsForUser(string body)
         {
             try
             {
                 var userId = JsonConvert.DeserializeObject<int>(body);
                 List<NotificationModel> notifications;
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
-                    notifications = await notificationService.GetNotificationsForUser(userId);
-                }
+                notifications = await _notificationService.GetNotificationsForUser(userId);
 
                 return new CustomProtocolResponse
                 {
@@ -45,22 +48,17 @@ namespace Server.CommandHandlers
             }
         }
 
-        public async static Task<CustomProtocolResponse> IssueNotificationForFinalizedMenu(IServiceProvider serviceProvider, string body)
+        public async Task<CustomProtocolResponse> IssueNotificationForFinalizedMenu(string body)
         {
             try
             {
-                using (var scope = serviceProvider.CreateScope())
+                var tomorrow = DateTime.UtcNow.Date.AddDays(1);
+                string tomorrowDate = tomorrow.ToShortDateString();
+                List<int> roles = new()
                 {
-                    var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-
-                    var tomorrow = DateTime.UtcNow.Date.AddDays(1);
-                    string tomorrowDate = tomorrow.ToShortDateString();
-                    List<int> roles = new List<int>()
-                    {
-                        (int)Roles.User
-                    };
-                    await notificationService.IssueNotifications(NotificationTypes.FinalizeMenu, $"The Menu for {tomorrowDate} has been finalized.", roles);
-                }
+                    (int)Roles.User
+                };
+                await _notificationService.IssueNotifications(NotificationTypes.FinalizeMenu, $"The Menu for {tomorrowDate} has been finalized.", roles);
 
                 var response = new CommonServerResponse
                 {
