@@ -23,8 +23,8 @@ namespace RecommendationEngine.Data
         public DbSet<NotificationType> NotificationTypes { get; set; }
         public DbSet<DailyRolledOutMenuItemVote> DailyRolledOutMenuItemVotes { get; set; }
         public DbSet<Characteristic> Characteristics { get; set; }
-        public DbSet<MenuItemCharacteristic> MenuItemCharacteristicMappings { get; set; }
-        public DbSet<UserPreference> UserPreferenceMappings { get; set; }
+        public DbSet<MenuItemCharacteristic> MenuItemCharacteristics { get; set; }
+        public DbSet<UserPreference> UserPreferences { get; set; }
         public DbSet<DiscardedMenuItem> DiscardedMenuItems { get; set; }
         public DbSet<DiscardedMenuItemFeedback> DiscardedMenuItemFeedbacks { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)

@@ -11,7 +11,7 @@ namespace RecommendationEngine.Data.Repositories
 {
     public class UserPreferenceRepository : CrudBaseRepository<UserPreference>, IUserPreferenceRepository
     {
-        public UserPreferenceRepository(AppDbContext appDbContext, ILogger<UserPreference> logger) :
+        public UserPreferenceRepository(AppDbContext appDbContext, ILogger<UserPreferenceRepository> logger) :
             base(appDbContext, logger)
         {
 
