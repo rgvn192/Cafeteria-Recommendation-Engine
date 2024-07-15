@@ -75,21 +75,5 @@ namespace UnitTest.Services
             await Assert.ThrowsExceptionAsync<AppException>(async () => await _userPreferenceService.Add(model));
         }
 
-        //[TestMethod]
-        //public async Task GetPreferencesByUserId_ShouldReturnPreferences_WhenUserIdIsValid()
-        //{
-        //    // Arrange
-        //    _context.UserPreferences.Add(new UserPreference { UserId = 2, CharacteristicId = 5 });
-        //    _context.UserPreferences.Add(new UserPreference {UserId = 2, CharacteristicId = 2 });
-        //    await _context.SaveChangesAsync();
-
-        //    // Act
-        //    var result = await _userPreferenceService.GetPreferencesByUserId(2);
-
-        //    // Assert
-        //    Assert.AreEqual(2, result.Count);
-        //}
-
-        
     }
 }

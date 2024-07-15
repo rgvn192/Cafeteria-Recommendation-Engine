@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RecommendationEngine.Client.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,5 +13,7 @@ namespace RecommendationEngine.Client.Models
         public string Name { get; set; }
         public decimal Price { get; set; }
         public int MenuItemCategoryId { get; set; }
+
+        public MenuItemCategory MenuItemCategory { get; set; }
     }
 }

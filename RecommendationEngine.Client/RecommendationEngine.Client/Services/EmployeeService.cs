@@ -20,7 +20,7 @@ namespace RecommendationEngine.Client.Services
             _logger = logger;
         }
 
-        public async Task ShowMenuAsync(NetworkStream stream, string role, int? userId) // Include the role parameter
+        public async Task ShowMenuAsync(NetworkStream stream, string role, int? userId)
         {
             while (true)
             {
@@ -114,14 +114,24 @@ namespace RecommendationEngine.Client.Services
             return new List<UserPreferenceModel>();
         }
 
-        private void DisplayUserPreferences(List<UserPreferenceModel> userPreferences)
+        private static void DisplayUserPreferences(List<UserPreferenceModel> userPreferences)
         {
-            if (userPreferences != null && userPreferences.Count != 0)
+            if (userPreferences != null && userPreferences.Count > 0)
             {
-                Console.WriteLine($"CharacteristicId\t\tCharacteristic\n");
+                const int userPreferenceIdWidth = 20;
+                const int characteristicNameWidth = 30;
+
+                Console.WriteLine(
+                    $"{nameof(UserPreferenceModel.UserPreferenceId),-userPreferenceIdWidth}" +
+                    $"{nameof(UserPreferenceModel.Characteristic.Name),-characteristicNameWidth}"
+                );
+
                 foreach (var userPreference in userPreferences)
                 {
-                    Console.WriteLine($"{userPreference.UserPreferenceId}\t{userPreference.Characteristic?.Name}\n");
+                    Console.WriteLine(
+                        $"{userPreference.UserPreferenceId,-userPreferenceIdWidth}" +
+                        $"{userPreference.Characteristic?.Name ?? "N/A",-characteristicNameWidth}"
+                    );
                 }
             }
             else
@@ -215,12 +225,29 @@ namespace RecommendationEngine.Client.Services
             return new List<Characteristic>();
         }
 
-        private void DisplayAllCharacteristics(List<Characteristic> allCharacteristics)
+        private static void DisplayAllCharacteristics(List<Characteristic> allCharacteristics)
         {
-            Console.WriteLine($"CharacteristicId\t\tCharacteristic\n");
-            foreach (var characteristic in allCharacteristics)
+            if (allCharacteristics != null && allCharacteristics.Count > 0)
             {
-                Console.WriteLine($"{characteristic.CharacteristicId}\t{characteristic.Name}\n");
+                const int characteristicIdWidth = 20;
+                const int characteristicNameWidth = 30;
+
+                Console.WriteLine(
+                    $"{nameof(Characteristic.CharacteristicId),-characteristicIdWidth}" +
+                    $"{nameof(Characteristic.Name),-characteristicNameWidth}"
+                );
+
+                foreach (var characteristic in allCharacteristics)
+                {
+                    Console.WriteLine(
+                        $"{characteristic.CharacteristicId,-characteristicIdWidth}" +
+                        $"{characteristic.Name,-characteristicNameWidth}"
+                    );
+                }
+            }
+            else
+            {
+                Console.WriteLine("No characteristics to display.");
             }
         }
 
@@ -260,7 +287,7 @@ namespace RecommendationEngine.Client.Services
             }
         }
 
-        private async Task CheckNotifications(NetworkStream stream, string role, int? userId) // Include the role parameter
+        private async Task CheckNotifications(NetworkStream stream, string role, int? userId)
         {
             try
             {
@@ -302,7 +329,7 @@ namespace RecommendationEngine.Client.Services
 
         }
 
-        private async Task CheckForRolledOutMenuForNextDay(NetworkStream stream, string role, int? userId) // Include the role parameter
+        private async Task CheckForRolledOutMenuForNextDay(NetworkStream stream, string role, int? userId)
         {
             try
             {
@@ -324,15 +351,7 @@ namespace RecommendationEngine.Client.Services
                 if (response != null && response.Status == "Success")
                 {
                     var rolledOutMenuItemResponse = JsonConvert.DeserializeObject<List<RolledOutMenuItem>>(response.Body);
-                    if (rolledOutMenuItemResponse != null)
-                    {
-                        Console.WriteLine($"Rolled Out Menu Item Id\tName\tPrice\tAverageRating\tMealType\n");
-
-                        foreach (var item in rolledOutMenuItemResponse)
-                        {
-                            Console.WriteLine($"{item.DailyRolledOutMenuItemId}\t\t{item.MenuItem.Name}\t{item.MenuItem.Price}\t{item.MenuItem.AverageRating}\t{item.MenuItem.Comments}\t{item.MealType.Name}\n");
-                        }
-                    }
+                    DisplayRolledOutMenuItems(rolledOutMenuItemResponse);
                 }
             }
             catch (Exception ex)
@@ -340,10 +359,43 @@ namespace RecommendationEngine.Client.Services
                 _logger.LogError(ex, "Error sending request to server");
                 Console.WriteLine($"{ex.Message}");
             }
-
         }
 
-        private async Task VoteForMenuItemForNextDay(NetworkStream stream, string role, int? userId) // Include the role parameter
+        private static void DisplayRolledOutMenuItems(List<RolledOutMenuItem> rolledOutMenuItemResponse)
+        {
+            if (rolledOutMenuItemResponse != null && rolledOutMenuItemResponse.Count > 0)
+            {
+                const int rolledOutMenuItemIdWidth = 25;
+                const int nameWidth = 25;
+                const int priceWidth = 10;
+                const int averageRatingWidth = 15;
+                const int mealTypeWidth = 15;
+
+                Console.WriteLine(
+                    $"{nameof(RolledOutMenuItem.DailyRolledOutMenuItemId),-rolledOutMenuItemIdWidth}" +
+                    $"{nameof(RolledOutMenuItem.MenuItem.Name),-nameWidth}" +
+                    $"{nameof(RolledOutMenuItem.MenuItem.Price),-priceWidth}" +
+                    $"{nameof(RolledOutMenuItem.MenuItem.AverageRating),-averageRatingWidth}" +
+                    $"{nameof(RolledOutMenuItem.MealType.Name),-mealTypeWidth}"
+                );
+
+                foreach (var item in rolledOutMenuItemResponse)
+                {
+                    Console.WriteLine(
+                        $"{item.DailyRolledOutMenuItemId,-rolledOutMenuItemIdWidth}" +
+                        $"{item.MenuItem.Name,-nameWidth}" +
+                        $"{item.MenuItem.Price,-priceWidth}" +
+                        $"{item.MenuItem.AverageRating,-averageRatingWidth}" +
+                        $"{item.MealType.Name,-mealTypeWidth}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No rolled out menu items to display.");
+            }
+        }
+
+        private async Task VoteForMenuItemForNextDay(NetworkStream stream, string role, int? userId)
         {
             try
             {
@@ -392,14 +444,14 @@ namespace RecommendationEngine.Client.Services
 
         }
 
-        private async Task ViewFinalizedMenuItems(NetworkStream stream, string role) // Include the role parameter
+        private async Task ViewFinalizedMenuItems(NetworkStream stream, string role)
         {
             try
             {
                 var customRequest = new CustomProtocolRequest
                 {
                     Command = "ViewFinalizedRolledOutMenuItems",
-                    Role = role, // Include the role in the request
+                    Role = role, 
                 };
 
                 var response = await SendRequestAsync(stream, customRequest);
@@ -407,15 +459,7 @@ namespace RecommendationEngine.Client.Services
                 if (response != null && response.Status == "Success")
                 {
                     var rolledOutMenuItemResponse = JsonConvert.DeserializeObject<List<ViewFinalizedRolledOutMenuItemsResponse>>(response.Body);
-                    if (rolledOutMenuItemResponse != null)
-                    {
-                        Console.WriteLine($"Name\tPrice\tMeal Type\n");
-
-                        foreach (var item in rolledOutMenuItemResponse)
-                        {
-                            Console.WriteLine($"{item.MenuItem.Name}\t{item.MenuItem.Price}\t{item.Mealtype}");
-                        }
-                    }
+                    DisplayFinalizedRolledOutMenuItems(rolledOutMenuItemResponse);
                 }
             }
             catch (Exception ex)
@@ -426,7 +470,39 @@ namespace RecommendationEngine.Client.Services
 
         }
 
-        private async Task GiveFeedBackForMenuItem(NetworkStream stream, string role, int? userId) // Include the role parameter
+        private static void DisplayFinalizedRolledOutMenuItems(List<ViewFinalizedRolledOutMenuItemsResponse> rolledOutMenuItemResponse)
+        {
+            if (rolledOutMenuItemResponse != null && rolledOutMenuItemResponse.Count > 0)
+            {
+                // Define the column widths
+                const int nameWidth = 25;
+                const int priceWidth = 10;
+                const int mealTypeWidth = 15;
+
+                // Print the header with proper alignment
+                Console.WriteLine(
+                    $"{nameof(ViewFinalizedRolledOutMenuItemsResponse.MenuItem.Name),-nameWidth}" +
+                    $"{nameof(ViewFinalizedRolledOutMenuItemsResponse.MenuItem.Price),-priceWidth}" +
+                    $"{nameof(ViewFinalizedRolledOutMenuItemsResponse.Mealtype),-mealTypeWidth}"
+                );
+
+                // Print each item with proper alignment
+                foreach (var item in rolledOutMenuItemResponse)
+                {
+                    Console.WriteLine(
+                        $"{item.MenuItem.Name,-nameWidth}" +
+                        $"{item.MenuItem.Price,-priceWidth:C2}" + // Format price as currency
+                        $"{item.Mealtype,-mealTypeWidth}"
+                    );
+                }
+            }
+            else
+            {
+                Console.WriteLine("No rolled out menu items to display.");
+            }
+        }
+
+        private async Task GiveFeedBackForMenuItem(NetworkStream stream, string role, int? userId)
         {
             try
             {
@@ -500,7 +576,7 @@ namespace RecommendationEngine.Client.Services
 
         }
 
-        private async Task GiveFeedBackForDiscardedMenuItem(NetworkStream stream, string role, int? userId) // Include the role parameter
+        private async Task GiveFeedBackForDiscardedMenuItem(NetworkStream stream, string role, int? userId)
         {
             try
             {
@@ -539,7 +615,7 @@ namespace RecommendationEngine.Client.Services
                 var customRequest = new CustomProtocolRequest
                 {
                     Command = "GiveFeedBackOnDiscardedMenuItem",
-                    Role = role, // Include the role in the request
+                    Role = role,
                     Body = JsonConvert.SerializeObject(feedback)
                 };
 
@@ -563,14 +639,14 @@ namespace RecommendationEngine.Client.Services
 
         }
 
-        private async Task ViewMonthlyDiscardedMenuList(NetworkStream stream, string role) // Include the role parameter
+        private async Task ViewMonthlyDiscardedMenuList(NetworkStream stream, string role)
         {
             try
             {
                 var customRequest = new CustomProtocolRequest
                 {
                     Command = "GetDiscardedMenuItemsForCurrentMonth",
-                    Role = role, // Include the role in the request
+                    Role = role,
                     Body = null
                 };
 
@@ -579,20 +655,42 @@ namespace RecommendationEngine.Client.Services
                 if (response != null && response.Status == "Success")
                 {
                     var discardedMenuItemsResponse = JsonConvert.DeserializeObject<List<DiscardedMenuItemsResponse>>(response.Body);
-                    if (discardedMenuItemsResponse != null)
-                    {
-                        Console.WriteLine($"DailyRolledOutMenuItemId\tName\tAverageRating\n");
-                        foreach (var item in discardedMenuItemsResponse)
-                        {
-                            Console.WriteLine($"\t\t{item.DiscardedMenuItemId}\t\t{item.MenuItem.Name}\t{item.MenuItem.AverageRating}\n");
-                        }
-                    }
+                    DisplayDiscardedMenuItems(discardedMenuItemsResponse);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending request to server");
                 Console.WriteLine($"{ex.Message}");
+            }
+        }
+
+        private static void DisplayDiscardedMenuItems(List<DiscardedMenuItemsResponse> discardedMenuItemsResponse)
+        {
+            if (discardedMenuItemsResponse != null && discardedMenuItemsResponse.Count > 0)
+            {
+                const int discardedMenuItemIdWidth = 25;
+                const int nameWidth = 20;
+                const int averageRatingWidth = 15;
+
+                Console.WriteLine(
+                    $"{nameof(DiscardedMenuItemsResponse.DiscardedMenuItemId),-discardedMenuItemIdWidth}" +
+                    $"{nameof(DiscardedMenuItemsResponse.MenuItem.Name),-nameWidth}" +
+                    $"{nameof(DiscardedMenuItemsResponse.MenuItem.AverageRating),-averageRatingWidth}"
+                );
+
+                foreach (var item in discardedMenuItemsResponse)
+                {
+                    Console.WriteLine(
+                        $"{item.DiscardedMenuItemId,-discardedMenuItemIdWidth}" +
+                        $"{item.MenuItem.Name,-nameWidth}" +
+                        $"{item.MenuItem.AverageRating,-averageRatingWidth}"
+                    );
+                }
+            }
+            else
+            {
+                Console.WriteLine("No discarded menu items to display.");
             }
         }
 
@@ -613,10 +711,25 @@ namespace RecommendationEngine.Client.Services
 
         private async Task<CustomProtocolResponse> ReceiveResponseAsync(NetworkStream stream)
         {
-            var buffer = new byte[32768];
-            var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-            var responseJson = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            return JsonConvert.DeserializeObject<CustomProtocolResponse>(responseJson);
+            using (var memoryStream = new MemoryStream())
+            {
+                var buffer = new byte[32768];
+                int bytesRead;
+
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    memoryStream.Write(buffer, 0, bytesRead);
+
+                    if (!stream.DataAvailable)
+                    {
+                        break;
+                    }
+                }
+
+                var responseJson = Encoding.UTF8.GetString(memoryStream.ToArray());
+
+                return JsonConvert.DeserializeObject<CustomProtocolResponse>(responseJson);
+            }
         }
     }
 }

@@ -83,7 +83,7 @@ namespace Server.Services
                     {
                         (int)Roles.User
                     };
-                await _notificationService.IssueNotifications(NotificationTypes.DiscardMenuUpdated, $"Discard menu for has been updated. Please provide your feedback", roles);
+                await _notificationService.IssueNotifications(NotificationTypes.DiscardMenuUpdated, $"Discard menu has been updated. Please provide your feedback", roles);
             }
         }
 

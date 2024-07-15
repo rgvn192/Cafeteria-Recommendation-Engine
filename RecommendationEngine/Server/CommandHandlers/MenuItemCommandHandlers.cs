@@ -139,7 +139,7 @@ namespace Server.CommandHandlers
 
                 List<MenuItemModel> menuItems;
 
-                menuItems = await _menuItemService.GetList<MenuItemModel>(null, null, null, request.Limit, request.Offset);
+                menuItems = await _menuItemService.GetList<MenuItemModel>(include : $"{nameof(MenuItem.MenuItemCategory)}", null, null, request.Limit, request.Offset);
 
                 var response = new GetMenuItemsResponseModel
                 {
@@ -149,7 +149,7 @@ namespace Server.CommandHandlers
                 return new CustomProtocolResponse
                 {
                     Status = "Success",
-                    Body = JsonConvert.SerializeObject(response)
+                    Body = JsonHelper.SerializeObjectIgnoringCycles(response)
                 };
             }
             catch (Exception ex)
@@ -157,7 +157,7 @@ namespace Server.CommandHandlers
                 return new CustomProtocolResponse
                 {
                     Status = "Failure",
-                    Body = JsonConvert.SerializeObject(ex.Message)
+                    Body = JsonHelper.SerializeObjectIgnoringCycles(ex.Message)
                 };
             }
         }

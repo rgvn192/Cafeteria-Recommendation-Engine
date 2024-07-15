@@ -21,7 +21,7 @@ namespace RecommendationEngine.Client.Services
             _logger = logger;
         }
 
-        public async Task ShowMenuAsync(NetworkStream stream, string role, int? userId) // Include the role parameter
+        public async Task ShowMenuAsync(NetworkStream stream, string role, int? userId) 
         {
             while (true)
             {
@@ -82,7 +82,7 @@ namespace RecommendationEngine.Client.Services
             }
         }
 
-        private async Task GetMenuItemAsync(NetworkStream stream, string role) // Include the role parameter
+        private async Task GetMenuItemAsync(NetworkStream stream, string role)
         {
             try
             {
@@ -119,13 +119,8 @@ namespace RecommendationEngine.Client.Services
                 {
                     var getMenuItemResponse = JsonConvert.DeserializeObject<GetMenuItemsResponseModel>(response.Body);
                     var menuItems = getMenuItemResponse?.MenuItems;
-                    if (menuItems != null)
-                    {
-                        foreach (var item in menuItems)
-                        {
-                            Console.WriteLine($"{item.MenuItemId}\t{item.Name}\t{item.Price}\t{item.MenuItemCategoryId}\n");
-                        }
-                    }
+
+                    DisplayMenuItems(menuItems);
                 }
             }
             catch (Exception ex)
@@ -136,7 +131,42 @@ namespace RecommendationEngine.Client.Services
             }
         }
 
-        private async Task CheckNotifications(NetworkStream stream, string role, int? userId) // Include the role parameter
+        private static void DisplayMenuItems(List<MenuItemModel> menuItems)
+        {
+            if (menuItems != null && menuItems.Count > 0)
+            {
+                const int idWidth = 15;
+                const int nameWidth = 25;
+                const int priceWidth = 10;
+                const int categoryIdWidth = 20;
+                const int categoryNameWidth = 25;
+
+                Console.WriteLine(
+                    $"{nameof(MenuItemModel.MenuItemId),-idWidth}" +
+                    $"{nameof(MenuItemModel.Name),-nameWidth}" +
+                    $"{nameof(MenuItemModel.Price),-priceWidth}" +
+                    $"{nameof(MenuItemModel.MenuItemCategoryId),-categoryIdWidth}" +
+                    $"{nameof(MenuItemModel.MenuItemCategory),-categoryNameWidth}"
+                );
+
+                foreach (var item in menuItems)
+                {
+                    Console.WriteLine(
+                        $"{item.MenuItemId,-idWidth}" +
+                        $"{item.Name,-nameWidth}" +
+                        $"{item.Price,-priceWidth}" + 
+                        $"{item.MenuItemCategoryId,-categoryIdWidth}" +
+                        $"{item.MenuItemCategory.Name,-categoryNameWidth}"
+                    );
+                }
+            }
+            else
+            {
+                Console.WriteLine("No menu items to display.");
+            }
+        }
+
+        private async Task CheckNotifications(NetworkStream stream, string role, int? userId)
         {
             try
             {
@@ -179,14 +209,14 @@ namespace RecommendationEngine.Client.Services
 
         }
 
-        private async Task ViewVotesOnRolledOutMenuItems(NetworkStream stream, string role) // Include the role parameter
+        private async Task ViewVotesOnRolledOutMenuItems(NetworkStream stream, string role) 
         {
             try
             {
                 var customRequest = new CustomProtocolRequest
                 {
                     Command = "ViewVotesOnRolledOutMenuItems",
-                    Role = role, // Include the role in the request
+                    Role = role,
                     Body = null
                 };
 
@@ -195,14 +225,7 @@ namespace RecommendationEngine.Client.Services
                 if (response != null && response.Status == "Success")
                 {
                     var rolledOutMenuItems = JsonConvert.DeserializeObject<List<ViewVotesOnRolledOutMenuItemsResponse>>(response.Body);
-                    if (rolledOutMenuItems != null)
-                    {
-                        Console.WriteLine($"DailyRolledOutMenuItemId\tMenuItemId\tVotes\tMealTypeId\tIsShortListed\n");
-                        foreach (var item in rolledOutMenuItems)
-                        {
-                            Console.WriteLine($"\t\t{item.DailyRolledOutMenuItemId}\t\t\t{item.MenuItemId}\t{item.Votes}\t{item.MealTypeId}\t{item.IsShortListed}\n");
-                        }
-                    }
+                    DisplayRolledOutMenuItemsWithVotes(rolledOutMenuItems);
                 }
             }
             catch (Exception ex)
@@ -210,6 +233,41 @@ namespace RecommendationEngine.Client.Services
                 _logger.LogError(ex, "Error sending request to server");
                 Console.WriteLine($"{ex.Message}");
                 return;
+            }
+        }
+
+        public static void DisplayRolledOutMenuItemsWithVotes(List<ViewVotesOnRolledOutMenuItemsResponse> rolledOutMenuItems)
+        {
+            if (rolledOutMenuItems != null && rolledOutMenuItems.Count > 0)
+            {
+                const int idWidth = 25;
+                const int menuItemIdWidth = 15;
+                const int votesWidth = 10;
+                const int mealTypeIdWidth = 15;
+                const int isShortListedWidth = 15;
+
+                Console.WriteLine(
+                    $"{nameof(ViewVotesOnRolledOutMenuItemsResponse.DailyRolledOutMenuItemId),-idWidth}" +
+                    $"{nameof(ViewVotesOnRolledOutMenuItemsResponse.MenuItemId),-menuItemIdWidth}" +
+                    $"{nameof(ViewVotesOnRolledOutMenuItemsResponse.Votes),-votesWidth}" +
+                    $"{nameof(ViewVotesOnRolledOutMenuItemsResponse.MealTypeId),-mealTypeIdWidth}" +
+                    $"{nameof(ViewVotesOnRolledOutMenuItemsResponse.IsShortListed),-isShortListedWidth}"
+                );
+
+                foreach (var item in rolledOutMenuItems)
+                {
+                    Console.WriteLine(
+                        $"{item.DailyRolledOutMenuItemId,-idWidth}" +
+                        $"{item.MenuItemId,-menuItemIdWidth}" +
+                        $"{item.Votes,-votesWidth}" +
+                        $"{item.MealTypeId,-mealTypeIdWidth}" +
+                        $"{item.IsShortListed,-isShortListedWidth}"
+                    );
+                }
+            }
+            else
+            {
+                Console.WriteLine("No rolled-out menu items to display.");
             }
         }
 
@@ -359,14 +417,7 @@ namespace RecommendationEngine.Client.Services
                 if (response != null && response.Status == "Success")
                 {
                     var getRecommendationResponseModel = JsonConvert.DeserializeObject<List<GetRecommendationMenuItemResponse>>(response.Body);
-                    if (getRecommendationResponseModel != null)
-                    {
-                        Console.WriteLine($"MenuItemId\tName\tPrice\titem.MenuItemCategoryId\tUserLikeability\tAverageRating\tComments");
-                        foreach (var item in getRecommendationResponseModel)
-                        {
-                            Console.WriteLine($"{item.MenuItemId}\t{item.Name}\t{item.Price}\t{item.MenuItemCategoryId}\t{item.UserLikeability}\t{item.AverageRating}\t{item.Comments}");
-                        }
-                    }
+                    DisplayRecommendationMenuItems(getRecommendationResponseModel);
                 }
             }
             catch (Exception ex)
@@ -374,6 +425,50 @@ namespace RecommendationEngine.Client.Services
                 _logger.LogError(ex, "Error sending request to server");
                 Console.WriteLine($"{ex.Message}");
                 return;
+            }
+        }
+
+        public static void DisplayRecommendationMenuItems(List<GetRecommendationMenuItemResponse> recommendationMenuItems)
+        {
+            if (recommendationMenuItems != null && recommendationMenuItems.Count > 0)
+            {
+                // Define the column widths
+                const int menuItemIdWidth = 12;
+                const int nameWidth = 20;
+                const int priceWidth = 10;
+                const int categoryIdWidth = 20;
+                const int userLikeabilityWidth = 20;
+                const int averageRatingWidth = 15;
+                const int commentsWidth = 30;
+
+                // Print the header with proper alignment
+                Console.WriteLine(
+                    $"{nameof(GetRecommendationMenuItemResponse.MenuItemId),-menuItemIdWidth}" +
+                    $"{nameof(GetRecommendationMenuItemResponse.Name),-nameWidth}" +
+                    $"{nameof(GetRecommendationMenuItemResponse.Price),-priceWidth}" +
+                    $"{nameof(GetRecommendationMenuItemResponse.MenuItemCategoryId),-categoryIdWidth}" +
+                    $"{nameof(GetRecommendationMenuItemResponse.UserLikeability),-userLikeabilityWidth}" +
+                    $"{nameof(GetRecommendationMenuItemResponse.AverageRating),-averageRatingWidth}" +
+                    $"{nameof(GetRecommendationMenuItemResponse.Comments),-commentsWidth}"
+                );
+
+                // Print each item with proper alignment
+                foreach (var item in recommendationMenuItems)
+                {
+                    Console.WriteLine(
+                        $"{item.MenuItemId,-menuItemIdWidth}" +
+                        $"{item.Name,-nameWidth}" +
+                        $"{item.Price,-priceWidth}" + 
+                        $"{item.MenuItemCategoryId,-categoryIdWidth}" +
+                        $"{item.UserLikeability,-userLikeabilityWidth}" +
+                        $"{item.AverageRating,-averageRatingWidth}" +
+                        $"{item.Comments,-commentsWidth}"
+                    );
+                }
+            }
+            else
+            {
+                Console.WriteLine("No recommendation menu items to display.");
             }
         }
 
@@ -550,10 +645,25 @@ namespace RecommendationEngine.Client.Services
 
         private async Task<CustomProtocolResponse> ReceiveResponseAsync(NetworkStream stream)
         {
-            var buffer = new byte[8192];
-            var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-            var responseJson = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            return JsonConvert.DeserializeObject<CustomProtocolResponse>(responseJson);
+            using (var memoryStream = new MemoryStream())
+            {
+                var buffer = new byte[32768];
+                int bytesRead;
+
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    memoryStream.Write(buffer, 0, bytesRead);
+
+                    if (!stream.DataAvailable)
+                    {
+                        break;
+                    }
+                }
+
+                var responseJson = Encoding.UTF8.GetString(memoryStream.ToArray());
+
+                return JsonConvert.DeserializeObject<CustomProtocolResponse>(responseJson);
+            }
         }
 
         private static List<int> GetMenuItems(MealTypes mealType)

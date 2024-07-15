@@ -22,7 +22,7 @@ namespace RecommendationEngine.Client.Services
             _logger = logger;
         }
 
-        public async Task ShowMenuAsync(NetworkStream stream, string role) // Include the role parameter
+        public async Task ShowMenuAsync(NetworkStream stream, string role) 
         {
             while (true)
             {
@@ -63,7 +63,7 @@ namespace RecommendationEngine.Client.Services
             }
         }
 
-        private async Task AddMenuItemAsync(NetworkStream stream, string role) // Include the role parameter
+        private async Task AddMenuItemAsync(NetworkStream stream, string role)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace RecommendationEngine.Client.Services
                 var customRequest = new CustomProtocolRequest
                 {
                     Command = "AddMenuItem",
-                    Role = role, // Include the role in the request
+                    Role = role,
                     Body = JsonConvert.SerializeObject(addMenuItemRequest)
                 };
 
@@ -118,7 +118,7 @@ namespace RecommendationEngine.Client.Services
             }
         }
 
-        private async Task UpdateMenuItemAsync(NetworkStream stream, string role) // Include the role parameter
+        private async Task UpdateMenuItemAsync(NetworkStream stream, string role)
         {
             try
             {
@@ -157,7 +157,7 @@ namespace RecommendationEngine.Client.Services
                 var customRequest = new CustomProtocolRequest
                 {
                     Command = "UpdateMenuItem",
-                    Role = role, // Include the role in the request
+                    Role = role, 
                     Body = JsonConvert.SerializeObject(updateMenuItemRequest)
                 };
 
@@ -181,7 +181,7 @@ namespace RecommendationEngine.Client.Services
             }
         }
 
-        private async Task DeleteMenuItemAsync(NetworkStream stream, string role) // Include the role parameter
+        private async Task DeleteMenuItemAsync(NetworkStream stream, string role)
         {
             try
             {
@@ -195,7 +195,7 @@ namespace RecommendationEngine.Client.Services
                 var customRequest = new CustomProtocolRequest
                 {
                     Command = "DeleteMenuItem",
-                    Role = role, // Include the role in the request
+                    Role = role, 
                     Body = JsonConvert.SerializeObject(menuItemId)
                 };
 
@@ -219,7 +219,7 @@ namespace RecommendationEngine.Client.Services
             }
         }
 
-        private async Task GetMenuItemAsync(NetworkStream stream, string role) // Include the role parameter
+        private async Task GetMenuItemAsync(NetworkStream stream, string role)
         {
             try
             {
@@ -246,7 +246,7 @@ namespace RecommendationEngine.Client.Services
                 var customRequest = new CustomProtocolRequest
                 {
                     Command = "GetMenuItems",
-                    Role = role, // Include the role in the request
+                    Role = role,
                     Body = JsonConvert.SerializeObject(getMenuItemsRequestModel)
                 };
 
@@ -256,13 +256,8 @@ namespace RecommendationEngine.Client.Services
                 {
                     var getMenuItemResponse = JsonConvert.DeserializeObject<GetMenuItemsResponseModel>(response.Body);
                     var menuItems = getMenuItemResponse?.MenuItems;
-                    if (menuItems != null)
-                    {
-                        foreach (var item in menuItems)
-                        {
-                            Console.WriteLine($"{item.MenuItemId}\t{item.Name}\t{item.Price}\t{item.MenuItemCategoryId}\n");
-                        }
-                    }
+
+                    DisplayMenuItems(menuItems);
                 }
             }
             catch (Exception ex)
@@ -273,7 +268,42 @@ namespace RecommendationEngine.Client.Services
             }
         }
 
-        private async Task ToggleMenuItemAvailabilityAsync(NetworkStream stream, string role) // Include the role parameter
+        private static void DisplayMenuItems(List<MenuItemModel> menuItems)
+        {
+            if (menuItems != null && menuItems.Count > 0)
+            {
+                const int idWidth = 15;
+                const int nameWidth = 25;
+                const int priceWidth = 10;
+                const int categoryIdWidth = 20;
+                const int categoryNameWidth = 25;
+
+                Console.WriteLine(
+                    $"{nameof(MenuItemModel.MenuItemId),-idWidth}" +
+                    $"{nameof(MenuItemModel.Name),-nameWidth}" +
+                    $"{nameof(MenuItemModel.Price),-priceWidth}" +
+                    $"{nameof(MenuItemModel.MenuItemCategoryId),-categoryIdWidth}" +
+                    $"{nameof(MenuItemModel.MenuItemCategory),-categoryNameWidth}"
+                );
+
+                foreach (var item in menuItems)
+                {
+                    Console.WriteLine(
+                        $"{item.MenuItemId,-idWidth}" +
+                        $"{item.Name,-nameWidth}" +
+                        $"{item.Price,-priceWidth}" +
+                        $"{item.MenuItemCategoryId,-categoryIdWidth}" +
+                        $"{item.MenuItemCategory.Name,-categoryNameWidth}"
+                    );
+                }
+            }
+            else
+            {
+                Console.WriteLine("No menu items to display.");
+            }
+        }
+
+        private async Task ToggleMenuItemAvailabilityAsync(NetworkStream stream, string role)
         {
             try
             {
@@ -328,10 +358,25 @@ namespace RecommendationEngine.Client.Services
 
         private async Task<CustomProtocolResponse> ReceiveResponseAsync(NetworkStream stream)
         {
-            var buffer = new byte[8192];
-            var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-            var responseJson = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            return JsonConvert.DeserializeObject<CustomProtocolResponse>(responseJson);
+            using (var memoryStream = new MemoryStream())
+            {
+                var buffer = new byte[32768];
+                int bytesRead;
+
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    memoryStream.Write(buffer, 0, bytesRead);
+
+                    if (!stream.DataAvailable)
+                    {
+                        break;
+                    }
+                }
+
+                var responseJson = Encoding.UTF8.GetString(memoryStream.ToArray());
+
+                return JsonConvert.DeserializeObject<CustomProtocolResponse>(responseJson);
+            }
         }
 
     }
