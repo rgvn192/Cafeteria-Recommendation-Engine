@@ -1,0 +1,14 @@
+﻿using RecommendationEngine.Data.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Server.Interface
+{
+    public interface IMenuItemService : ICrudBaseService<MenuItem>
+    {
+        Task<List<MenuItem>> GetRecommendationByMenuItemCategory(int menuItemCategory, int limit);
+    }
+}
